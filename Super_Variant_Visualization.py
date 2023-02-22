@@ -6,12 +6,13 @@ from enum import Enum
 
 DEFAULT_CHEVRON_LENGTH = 30.
 DEFAULT_CHEVRON_HEIGHT = 15.
+OUTLINE_INTERACTIONS = False
+MARK_INCORRECT_INTERACTIONS = False
 
 class Mode(Enum):
     LANE_FREQUENCY = 1
     ACTIVITY_FREQUENCY = 2
     NO_FREQUENCY = 3
-
 
 current_annotations = []
 
@@ -23,7 +24,7 @@ def visualize_super_variant(super_variant, suppression_char = "*", mode = Mode.A
     :param suppression_char: The character used to suppress cardinalities greater 1
     :type suppression_char: str
     :param mode: One of the available modes for displaying frequencies
-    :type mode: MODE
+    :type mode: Mode
     '''
     if(len(super_variant.lanes) > 20):
         print("Summarization too large, cannot be visualized.")
@@ -50,18 +51,12 @@ def visualize_super_variant(super_variant, suppression_char = "*", mode = Mode.A
                     
                     event_position = (round(event.xdata), round(event.ydata))
                     positions = [(round(position[0][0]),round(position[0][1])) for position in current_annotations]
-                    for i in range(len(positions)):
-                        is_contained = False
-                        index = 0
-                        if is_inside(positions[i], 1, event_position):
-                            is_contained = True
-                            index = i
-                            break
 
-                        if(is_contained):
-                            annotate.xy = current_annotations[index][0]
-                            annotate.set_text(current_annotations[index][1])
-                            annotate.set_fontsize(current_annotations[index][2])
+                    for i in range(len(positions)):
+                        if is_inside(positions[i], 2, event_position):
+                            annotate.xy = current_annotations[i][0]
+                            annotate.set_text(current_annotations[i][1])
+                            annotate.set_fontsize(current_annotations[i][2])
                             annotate.set_visible(True)
                             fig.canvas.draw_idle()
 
@@ -101,7 +96,7 @@ def visualize_variant(variant, mode = Mode.NO_FREQUENCY):
     :param variant: The variant that should be visualized
     :type variant: ExtractedVariant
     :param mode: One of the available modes for displaying frequencies
-    :type mode: MODE
+    :type mode: mode
     '''
     if(len(variant.lanes) > 20):
         print("Summarization too large, cannot be visualized.")
@@ -135,7 +130,7 @@ def arrange_super_variant(super_variant, ax, vertical_start_position, horizontal
     :param suppression_char: The character used to suppress cardinalities greater 1
     :type suppression_char: str
     :param mode: One of the available modes for displaying frequencies
-    :type mode: MODE
+    :type mode: mode
     :param fontsize_title: The fontsize of the title
     :type fontsize_title: float
     :param fontsize_activities: The fontsize of the activity labels
@@ -234,7 +229,7 @@ def __visualize_lane_elements(ax, lane, elements, lane_properties, interaction_p
     :param horizontal_start_position: The x-value of the lower-left corner of the first activity chevron
     :type horizontal_start_position: float
     :param mode: One of the available modes for displaying frequencies
-    :type mode: MODE
+    :type mode: mode
     :param fontsize: The fontsize of the activity labels
     :type fontsize: float
     :param cut_off_point: The maximal length an activity label can have
@@ -300,7 +295,7 @@ def __interaction_activity_chevron(ax, lane, element, index, lane_properties, in
     :param original_lane_properties: The properties of the high-level Super Lane
     :type original_lane_properties: dict
     :param mode: One of the available modes for displaying frequencies
-    :type mode: MODE
+    :type mode: mode
     :param cut_off_point: The maximal length an activity label can have
     :type cut_off_point: int
     :param overall_line_style: The line style of the chevron outline
@@ -312,20 +307,27 @@ def __interaction_activity_chevron(ax, lane, element, index, lane_properties, in
     if(lane_properties[lane]["IsOptional"]):
         overall_line_style = '--'
 
-
+    outline_color = "black"
     is_interacting, interaction_point = IED.is_interaction_point(interaction_points, original_lane, element.position)
     
     if(not is_interacting):
-        interacting_lanes = [original_lane]
+        interacting_lanes = [[original_lane]]
         print("Interaction not found.")
+        outline_color = "red"
 
     else:
-        interacting_lanes = interaction_point.interaction_lanes
+        all_interaction_points = IED.get_interaction_points(interaction_points, original_lane, element.position)
+        if(len(all_interaction_points) == 1):
+            interacting_lanes = [interaction_point.interaction_lanes]
+            if(len(set([position.get_base_index() for position in interaction_point.exact_positions])) > 1):
+                outline_color = "red"
+        else:
+            interacting_lanes = [all_interaction_points[0].interaction_lanes]
+            for i in range(1, len(all_interaction_points)):
+                interacting_lanes.append(all_interaction_points[i].interaction_lanes)
+                if(len(set([position.get_base_index() for position in all_interaction_points[i].exact_positions])) > 1):
+                    outline_color = "red"
 
-    number_sub_chevrons = len(interacting_lanes)
-    length_sub_chevron = (1 / number_sub_chevrons)
-   
-    interacting_lanes.sort(key = lambda x: original_lane_properties[x]["Color"])
 
     label = element.activity
     heigth_offset = 0.3
@@ -341,10 +343,26 @@ def __interaction_activity_chevron(ax, lane, element, index, lane_properties, in
 
     ax.text(index * chevron_length + length_offset + current_horizontal_position, current_vertical_position * chevron_height + 0.5 * chevron_height * lane_properties[lane]["Height"] - heigth_offset, label, zorder = 15, fontsize = fontsize * sizing_factor)
 
-    for i in range(len(interacting_lanes)):
-        color = original_lane_properties[interacting_lanes[i]]["Color"]
-        ax.add_patch(patches.PathPatch(__chevron_at_position(current_horizontal_position + index * chevron_length + i * length_sub_chevron * chevron_length, current_vertical_position * chevron_height, length_sub_chevron * chevron_length/DEFAULT_CHEVRON_LENGTH, lane_properties[lane]["Height"]  * chevron_height), facecolor = color, lw = 0, ls = overall_line_style, zorder = 10))
-    ax.add_patch(patches.PathPatch(__chevron_at_position(current_horizontal_position + index * chevron_length, current_vertical_position * chevron_height, chevron_length/DEFAULT_CHEVRON_LENGTH, lane_properties[lane]["Height"]  * chevron_height), facecolor = "None", lw = 1.3 * fontsize / 9, ls = overall_line_style, zorder = 12))
+    if(OUTLINE_INTERACTIONS):
+        line_width = 0.25
+    else:
+        line_width = 0
+
+    sub_height = 1 / len(interacting_lanes)
+    current_percentage = 0
+    for interacting_lanes_list in interacting_lanes:
+        number_sub_chevrons = len(interacting_lanes_list)
+        length_sub_chevron = (1 / number_sub_chevrons)
+   
+        interacting_lanes_list.sort(key = lambda x: original_lane_properties[x]["Color"])
+
+        for i in range(len(interacting_lanes_list)):
+            color = original_lane_properties[interacting_lanes_list[i]]["Color"]
+            ax.add_patch(patches.PathPatch(__partial_chevron_at_position(current_horizontal_position + index * chevron_length + i * length_sub_chevron * chevron_length, current_vertical_position * chevron_height, length_sub_chevron * chevron_length/DEFAULT_CHEVRON_LENGTH, lane_properties[lane]["Height"]  * chevron_height, current_percentage, current_percentage + sub_height), facecolor = color, lw = line_width, ls = overall_line_style, zorder = 10))
+        
+        current_percentage += sub_height
+
+    ax.add_patch(patches.PathPatch(__chevron_at_position(current_horizontal_position + index * chevron_length, current_vertical_position * chevron_height, chevron_length/DEFAULT_CHEVRON_LENGTH, lane_properties[lane]["Height"]  * chevron_height), facecolor = "None", lw = 1.3 * fontsize / 9, ls = overall_line_style, zorder = 12, edgecolor = outline_color))
     
     return ax
 
@@ -374,7 +392,7 @@ def __common_activity_chevron(ax, lane, element, index, lane_properties, current
     :param fontsize: The fontsize for the activity label
     :type fontsize: int
     :param mode: One of the available modes for displaying frequencies
-    :type mode: MODE
+    :type mode: mode
     :param cut_off_point: The maximal length an activity label can have
     :type cut_off_point: int
     :param overall_line_style: The line style of the chevron outline
@@ -551,13 +569,13 @@ def __chevron_at_position(horizontal_index, vertical_index, length, height):
     '''
     from matplotlib.path import Path
     verts = [
-       (horizontal_index, vertical_index),  # Left bottom coner
+       (horizontal_index, vertical_index),  # Left bottom corner
        (horizontal_index + DEFAULT_CHEVRON_LENGTH * length, vertical_index),  # Right bottom corner
        (horizontal_index + DEFAULT_CHEVRON_LENGTH * length + 1.25, vertical_index + height / 2), # Outer tip of chevron
-       (horizontal_index + DEFAULT_CHEVRON_LENGTH * length, vertical_index + height),  # Right top coner
-       (horizontal_index, vertical_index + height),  # Left bottom coner
-       (horizontal_index + 1.25, vertical_index + height / 2), # Inner top of chevron
-       (horizontal_index, vertical_index),  # Left bottom coner
+       (horizontal_index + DEFAULT_CHEVRON_LENGTH * length, vertical_index + height),  # Right top corner
+       (horizontal_index, vertical_index + height),  # Left bottom corner
+       (horizontal_index + 1.25, vertical_index + height / 2), # Inner tip of chevron
+       (horizontal_index, vertical_index),  # Left bottom corner
     ]
 
     codes = [
@@ -569,6 +587,78 @@ def __chevron_at_position(horizontal_index, vertical_index, length, height):
         Path.LINETO,
         Path.CLOSEPOLY,
     ]
+
+    return Path(verts, codes)
+
+def __partial_chevron_at_position(horizontal_index, vertical_index, length, height, start_percentage, end_percentage):
+    '''
+    Generates a vector drawing of a chevron at a given position with a given length and height.
+    :param horizontal_index: The x-value of the position
+    :type horizontal_index: float
+    :param vertical_index: The y-value of the position
+    :type vertical_index: float
+    :param length: A factor scaling the length of the chevron
+    :type length: int
+    :param height: A factor scaling the height of the chevron
+    :type height: int
+    :return: The chevron as a path instance
+    :rtype: path
+    '''
+    from matplotlib.path import Path
+    if (start_percentage >= 0.5):
+        verts = [
+        (horizontal_index + 1.25 - (start_percentage - 0.5) * 2.5, vertical_index + start_percentage * height),  # Left bottom corner
+        (horizontal_index + 1.25 - (start_percentage - 0.5) * 2.5 + DEFAULT_CHEVRON_LENGTH * length, vertical_index + start_percentage * height),  # Right bottom corner
+        (horizontal_index + 1.25 - (end_percentage - 0.5) * 2.5 + DEFAULT_CHEVRON_LENGTH * length, vertical_index + end_percentage * height), # Right upper corner
+        (horizontal_index + 1.25 - (end_percentage - 0.5) * 2.5, vertical_index + end_percentage * height),  # Left upper corner
+        (horizontal_index + 1.25 - (start_percentage - 0.5) * 2.5, vertical_index + start_percentage * height),  # Left bottom corner
+        ]
+
+        codes = [
+            Path.MOVETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.CLOSEPOLY,
+        ]
+
+    elif (end_percentage <= 0.5):
+        verts = [
+        (horizontal_index + start_percentage * 2.5, vertical_index + start_percentage * height),  # Left bottom corner
+        (horizontal_index + start_percentage * 2.5 + DEFAULT_CHEVRON_LENGTH * length, vertical_index + start_percentage * height),  # Right bottom corner
+        (horizontal_index + end_percentage * 2.5 + DEFAULT_CHEVRON_LENGTH * length, vertical_index + end_percentage * height), # Right upper corner
+        (horizontal_index + end_percentage * 2.5, vertical_index + end_percentage * height),  # Left upper corner
+        (horizontal_index + start_percentage * 2.5, vertical_index + start_percentage * height),  # Left bottom corner
+        ]
+
+        codes = [
+            Path.MOVETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.CLOSEPOLY,
+        ]
+
+    else:
+        verts = [
+        (horizontal_index + start_percentage * 2.5, vertical_index + start_percentage * height),  # Left bottom corner
+        (horizontal_index + start_percentage * 2.5 + DEFAULT_CHEVRON_LENGTH * length, vertical_index + start_percentage * height),  # Right bottom corner
+        (horizontal_index + DEFAULT_CHEVRON_LENGTH * length + 1.25, vertical_index + height / 2), # Outer tip of chevron
+        (horizontal_index + 1.25 - (end_percentage - 0.5) * 2.5 + DEFAULT_CHEVRON_LENGTH * length, vertical_index + end_percentage * height), # Right upper corner
+        (horizontal_index + 1.25 - (end_percentage - 0.5) * 2.5, vertical_index + end_percentage * height),  # Left upper corner
+        (horizontal_index + 1.25, vertical_index + height / 2), # Inner tip of chevron
+        (horizontal_index + 1.25 - (start_percentage - 0.5) * 2.5, vertical_index + start_percentage * height),  # Left bottom corner
+        ]
+
+        codes = [
+            Path.MOVETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.LINETO,
+            Path.CLOSEPOLY,
+        ]
 
     return Path(verts, codes)
 

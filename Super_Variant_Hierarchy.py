@@ -223,6 +223,12 @@ def visualize_single_summarization_step(super_variant_1, super_variant_2, new_su
     ax3.set_ylim(-2, height3 + 2)
     ax3.axis('off')
 
+    if(TOOLTIPS):
+        current_annotations.append(ax3.annotate("See Super Variant " + str(new_super_variant.id) + " in Detail", (0, 0), xytext = (0, 10), textcoords = 'offset points', color = 'w', ha = 'center', fontsize = 8, fontweight = 'bold', 
+                                                        bbox = dict(boxstyle='round, pad = .5', fc = (.1, .1, .1, .8), ec = (0., 0, 0), lw = 0, zorder = 50)))
+        
+        ax3.figure.texts.append(ax3.texts.pop())
+
     def hover_info(event):
 
         annotate = current_annotations[0]
@@ -251,6 +257,19 @@ def visualize_single_summarization_step(super_variant_1, super_variant_2, new_su
             annotate.set_visible(False)
             fig.canvas.draw_idle()
 
+        annotate = current_annotations[2]
+        annotation_visbility = annotate.get_visible()
+        if event.inaxes == ax3:
+                            
+            event_position = (round(event.xdata), round(event.ydata))
+            annotate.xy = event_position
+            annotate.set_visible(True)
+            fig.canvas.draw_idle()
+
+        elif(annotation_visbility):
+            annotate.set_visible(False)
+            fig.canvas.draw_idle()
+
     def click(event):
 
         if event.inaxes == ax1:
@@ -266,6 +285,9 @@ def visualize_single_summarization_step(super_variant_1, super_variant_2, new_su
 
             else:
                 SVV.visualize_super_variant(super_variant_2[0], mode = MODE)
+
+        elif event.inaxes == ax3:
+            SVV.visualize_super_variant(new_super_variant, mode = MODE)
 
 
     fig.subplots_adjust(wspace=0.03, hspace=0)

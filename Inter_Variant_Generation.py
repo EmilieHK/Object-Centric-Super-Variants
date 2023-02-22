@@ -9,7 +9,6 @@ class Distribution(Enum):
     NORMAL = 2
     EXPLORATION = 3
 
-
 NESTED_STRUCTURES = True
 
 

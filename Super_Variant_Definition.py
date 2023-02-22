@@ -198,6 +198,27 @@ class SummarizedVariant:
             if (lane.lane_id == id):
                 return lane
         return None
+
+    def remove_gaps(self):
+        '''
+        Removes unnecessary gaps from the Super Variant for improved visualization.
+        :param self: The summarized variant
+        :type self: SummarizedVariant
+        '''
+        indices_with_no_chevrons = []
+        for lane in self.lanes:
+            indices_with_no_chevrons.append(lane.get_gaps())
+
+        result = indices_with_no_chevrons[0]
+        for k in range(1, len(indices_with_no_chevrons)):
+                result = list(set(result) & set(indices_with_no_chevrons[k]))
+        
+        if(result == []):
+            return 
+        else:
+            #TODO remove gaps and update positions
+            return
+
  
 class SuperVariant(SummarizedVariant):
     '''The generalized data structure of the summarization of object-centric variants and Super Variants'''
@@ -263,6 +284,54 @@ class SuperLane:
             else:
                 length += (element.index_end - element.index_start) + 1
         return length
+
+
+    def get_gaps(self):
+        '''
+        Returns a list of all horizontal_indices that are not occupied by an activity.
+         :param self: The summarizing Super Lane
+        :type self: SuperLane
+         :return: The list of found indices
+        :rtype: list
+        '''
+        indices_with_no_chevrons = []
+
+        if(type(self.elements[0]) == InteractionConstruct or type(self.elements[0]) == CommonConstruct):
+            for j in range(0, self.elements[0].index):
+                indices_with_no_chevrons.append(j)
+        elif(type(self.elements[0]) == ChoiceConstruct or type(self.elements[0]) == OptionalConstruct):
+            for j in range(0, self.elements[0].index_start):
+                indices_with_no_chevrons.append(j)
+
+        for i in range(1, len(self.elements)):
+            if(type(self.elements[i]) == InteractionConstruct or type(self.elements[i]) == CommonConstruct):
+                if(type(self.elements[i-1]) == InteractionConstruct or type(self.elements[i-1]) == CommonConstruct):
+                    for j in range(self.elements[i-1].index + 1, self.elements[i].index):
+                        indices_with_no_chevrons.append(j)
+                elif(type(self.elements[i-1]) == ChoiceConstruct or type(self.elements[i-1]) == OptionalConstruct):
+                    for j in range(self.elements[i-1].index_end + 1, self.elements[i].index):
+                        indices_with_no_chevrons.append(j)
+
+            elif(type(self.elements[i]) == ChoiceConstruct or type(self.elements[i]) == OptionalConstruct):
+                if(type(self.elements[i-1]) == InteractionConstruct or type(self.elements[i-1]) == CommonConstruct):
+                    for j in range(self.elements[i-1].index + 1, self.elements[i].index_start):
+                        indices_with_no_chevrons.append(j)
+                elif(type(self.elements[i-1]) == ChoiceConstruct or type(self.elements[i-1]) == OptionalConstruct):
+                    for j in range(self.elements[i-1].index_end + 1, self.elements[i].index_start):
+                        indices_with_no_chevrons.append(j)
+
+                intermediate_results = []
+                for option in self.elements[i].choices:
+                    intermediate_results.append(option.get_gaps())
+
+                final_intermediate_result = intermediate_results[0]
+                for k in range(1, len(intermediate_results)):
+                    final_intermediate_result = list(set(final_intermediate_result) & set(intermediate_results[k]))
+                indices_with_no_chevrons.extend(indices_with_no_chevrons)
+
+        return indices_with_no_chevrons
+
+
 
     def get_interaction_points(self, interactions, lane_id):
         '''
@@ -862,7 +931,7 @@ class SuperLane:
 
         return count
     
-    def shift_lane(self, start_element, offset, index = None):
+    def shift_lane(self, start_element, offset, observed_positions, index = None):
         '''
         Shifts the positions of the Super Lane by an offset starting from a given start element.
         :param self: The summarizing Super Lane
@@ -871,15 +940,24 @@ class SuperLane:
         :type start_element: SummarizationConstruct
         :param offset: The offset of the shift
         :type offset: int
+        :param observed_positions: A dictionary with all other interaction point positions relevant for this shift, these are observed and updated accordingly
+        :type observed_positions: dict
         :param index: The index of the starting element in the list of elements and the lane itself
         :type index: int, SuperLane
+        :return: The dictionary with the observed updated positions and the lane
+        :rtype: dict, SuperLane
         '''
+        import copy
         if(index == None):
             index = self.elements.index(start_element)
+            
         for i in range(index, len(self.elements)):
             if(type(self.elements[i]) == CommonConstruct or type(self.elements[i]) == InteractionConstruct):
+                position_before = copy.deepcopy(self.elements[i].position)
                 self.elements[i].index += offset
                 self.elements[i].position.apply_shift(offset)
+                observed_positions[str(position_before)] = self.elements[i].position
+
             elif(type(self.elements[i]) == ChoiceConstruct or type(self.elements[i]) == OptionalConstruct):
                 self.elements[i].index_start += offset
                 self.elements[i].index_end += offset 
@@ -887,9 +965,9 @@ class SuperLane:
                 self.elements[i].position_end.apply_shift(offset)
 
                 for choice in self.elements[i].choices:
-                    choice.shift_lane(choice.elements[0], offset, 0)
+                    choice, observed_positions = choice.shift_lane(choice.elements[0], offset, observed_positions, 0)
 
-        return self
+        return self, observed_positions
 
     def shift_lane_exact(self, start_position, offset, observed_positions, original_position):
         '''
@@ -915,9 +993,7 @@ class SuperLane:
 
             # Case 1: Start shifting from a Common Activity
             if((type(self.elements[i]) == InteractionConstruct) and is_base_position and self.elements[i].index == unpacked_position):
-                self = self.shift_lane(self.elements[i], offset, i)
-                for key in observed_positions.keys():
-                    observed_positions[key].apply_shift(offset)
+                self, observed_positions = self.shift_lane(self.elements[i], offset, observed_positions, i)
                 return observed_positions, self
         
             # Case 2: Start shifting from a Generic Choice Structure
@@ -925,42 +1001,7 @@ class SuperLane:
                 start_index_before_shift = self.elements[i].index_start
                 end_index_before_shift = self.elements[i].index_end
                 
-                all_relevant_observed_positions = dict()
-                following_relevant_observed_position = dict()
-                remaining_observed_positions = dict()
-                
-                for key in observed_positions.keys():
-                    if (observed_positions[key].get_base_index() >= start_index_before_shift and observed_positions[key].get_base_index() <= end_index_before_shift):
-
-                        in_same_lane = True
-                        unpacked_levels = original_position.get_depth() - unpacked_position.get_depth()
-
-                        unpacked_value = copy.deepcopy(observed_positions[key])
-                        unpacked_original = copy.deepcopy(original_position)
-
-                        for j in range(unpacked_levels):
-                            if (unpacked_value.lane_id != unpacked_original.lane_id):
-                                in_same_lane = False
-                                break
-                            else:
-                                unpacked_value = unpacked_value.position
-                                unpacked_original = unpacked_original.position
-                                
-                        in_same_lane = in_same_lane and unpacked_value.lane_id == unpacked_position.lane_id
-
-                        if(in_same_lane):
-                            all_relevant_observed_positions[key] = observed_positions[key]
-
-                        else:
-                            remaining_observed_positions[key] = observed_positions[key]
-
-                    elif(observed_positions[key].get_base_index() > end_index_before_shift):
-                        following_relevant_observed_position[key] = observed_positions[key]
-
-                    else:
-                        remaining_observed_positions[key] = observed_positions[key]
-
-                updated_relevant_observed_shift, self.elements[i].choices[unpacked_position.lane_id] = self.elements[i].choices[unpacked_position.lane_id].shift_lane_exact(unpacked_position, offset, all_relevant_observed_positions, original_position)
+                observed_positions, self.elements[i].choices[unpacked_position.lane_id] = self.elements[i].choices[unpacked_position.lane_id].shift_lane_exact(unpacked_position, offset, observed_positions, original_position)
 
                 all_start_indices = []
                 all_end_indices = []
@@ -981,20 +1022,9 @@ class SuperLane:
                 self.elements[i].position_start.apply_shift(self.elements[i].index_start - start_index_before_shift)
                 self.elements[i].position_end.apply_shift(self.elements[i].index_end - end_index_before_shift)
                 
-                if(i < len(self.elements)-1):
-                    self = self.shift_lane(self.elements[i+1], self.elements[i].index_end - end_index_before_shift, i+1)
-
-                for key in following_relevant_observed_position.keys():
-                    following_relevant_observed_position[key].apply_shift(self.elements[i].index_end - end_index_before_shift)
-                    observed_positions[key] = following_relevant_observed_position[key]
-
-                for key in updated_relevant_observed_shift.keys():
-                    observed_positions[key] = updated_relevant_observed_shift[key]
-
-                for key in remaining_observed_positions.keys():
-                    observed_positions[key] = remaining_observed_positions[key]
+                if(i < len(self.elements) - 1):
+                    self, observed_positions = self.shift_lane(self.elements[i+1], self.elements[i].index_end - end_index_before_shift, observed_positions, i+1)
         
-
                 return observed_positions, self
 
         return observed_positions, self

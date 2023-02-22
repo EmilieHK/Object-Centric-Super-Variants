@@ -319,8 +319,9 @@ def is_interaction_point(interactions, lane, position):
     '''
     for interaction in interactions:
         for i in range(len(interaction.interaction_lanes)):
-            if ((interaction.interaction_lanes[i] == lane) and (interaction.exact_positions[i] == position)):
-                return True, interaction
+            if(i in range(len(interaction.exact_positions))):
+                if ((interaction.interaction_lanes[i] == lane) and (interaction.exact_positions[i] == position)):
+                    return True, interaction
     return False, None
 
 
@@ -341,6 +342,7 @@ def get_interaction_points(interactions, lane, position):
     result = []
     for interaction in interactions:
         for i in range(len(interaction.interaction_lanes)):
-            if ((interaction.interaction_lanes[i] == lane) and (interaction.exact_positions[i] == position)):
-                result.append(interaction)
+            if(i in range(len(interaction.exact_positions))):
+                if ((interaction.interaction_lanes[i] == lane) and (interaction.exact_positions[i] == position)):
+                    result.append(interaction)
     return result

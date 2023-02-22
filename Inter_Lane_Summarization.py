@@ -1,7 +1,6 @@
 import Super_Variant_Definition as SVD
 import Input_Extraction_Definition as IED
 
-
 def __inter_lane_summarization(lanes, interactions, print_results, current_lane = 0, offset = 0, intra = False, nested = False):
     '''
     Performs the summarization of the given Super Lanes using the set of defined patterns.
@@ -400,6 +399,7 @@ def __apply_patterns(interval_subprocesses, start_index, interactions, base_lane
         choice = []
         current_mappings = dict()
         contains_interaction = False
+
         for i in range(len(elements[1])):
             
             if(isinstance(elements[1][i], SVD.InteractionConstruct)):
@@ -409,6 +409,7 @@ def __apply_patterns(interval_subprocesses, start_index, interactions, base_lane
                         identifier = 0
                     else: 
                         identifier = elements[0]
+                    
                     current_mappings[(identifier, str([str(position) for position in interaction_point.exact_positions]), str(interaction_point.interaction_lanes))] = start_index + i
                     contains_interaction = True
                 choice.append(SVD.InteractionConstruct(elements[1][i].activity, elements[1][i].frequency, IED.BasePosition(current_lane, position), position))
@@ -463,7 +464,6 @@ def __apply_patterns(interval_subprocesses, start_index, interactions, base_lane
         for elem in choices[i][0]:
             elem.frequency = choices[i][2] / len(interval_subprocesses)
         choices[i] = SVD.SuperLane(i, "Option " + str(i), base_lanes[0].object_type, choices[i][0], choices[i][1], choices[i][2], [])
-
    
     # Applying Optional Pattern
     if(is_optional):
