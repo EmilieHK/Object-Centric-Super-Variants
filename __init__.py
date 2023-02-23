@@ -3,26 +3,28 @@ from ocpa.objects.log.importer.ocel import factory as ocel_import_factory
 from ocpa.visualization.log.variants import factory as variants_visualization_factory
 from ocpa.algo.util.filtering.log import case_filtering
 from ocpa.objects.log.exporter.ocel import factory as ocel_export_factory
+from ocpa.algo.util.filtering.log import variant_filtering
 
-import Input_Extraction_Definition as IED
-import Super_Variant_Definition as SVD
 import Super_Variant_Visualization as SVV
-import Intra_Variant_Summarization as IAVS
 import Summarization_Selection as SS
 import Intra_Variant_Generation as IAVG
 import Inter_Variant_Summarization as IEVS
 import Inter_Variant_Generation as IEVG
 import Super_Variant_Hierarchy as SVH
 
-MODE = 8
+MODE = 9
 
-filename = "EventLogs/BPI2017-Top10.jsonocel"
-parameters = {"execution_extraction": "leading_type",
-              "leading_type": "application"}
-ocel = ocel_import_factory.apply(file_path = filename , parameters = parameters)
+filename = "EventLogs/BPI2017.jsonocel"
+ocel = ocel_import_factory.apply(file_path = filename)
+#print(len(ocel.variants))
 
-all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization(ocel)
-summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
+ocel_filtered = variant_filtering.filter_infrequent_variants(ocel, 0.4)
+print(len(ocel_filtered.variants))
+ocel_export_factory.apply(ocel_filtered, 'EventLogs/PerformanceAnalysis/BPI2017-Filtered_20.jsonocel')
+
+
+#all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization(ocel)
+#summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
 
 #filename = "EventLogs/order_process.jsonocel"
 #ocel = ocel_import_factory.apply(file_path = filename)
@@ -31,6 +33,7 @@ summarizations = SS.intra_variant_summarization_selection(all_summarizations, pe
 #extracted_variant = IED.extract_lanes(variant_layouting[ocel.variants[5]], ocel.variant_frequencies[5])
 #SVV.visualize_variant(extracted_variant)
 
+'''
 IEVG.NESTED_STRUCTURES = True
 if(MODE == 1):
     initial_super_variants = IEVG.classify_initial_super_variants_by_activity([summarizations[3], summarizations[4], summarizations[6], summarizations[7], summarizations[8], summarizations[9]], "Refuse offer")
@@ -87,4 +90,4 @@ elif(MODE == 8):
     super_variant, cost = IEVS.join_super_variants(summarizations[9], summarizations[5], True, True)
     #super_variant, cost = IEVS.join_super_variants(super_variant, summarizations[7], True, False)
     SVV.visualize_super_variant(super_variant, mode = SVV.Mode.NO_FREQUENCY)
-
+'''

@@ -704,7 +704,7 @@ class SuperLane:
             elif(type(element) == ChoiceConstruct or type(element) == OptionalConstruct):
                 intermediate_result = []
                 for i in range(len(element.choices)):
-                    for sublist in element.choices[i].get_realizations_normalized(element.start):
+                    for sublist in element.choices[i].get_realizations_normalized():
                         intermediate_result.extend([realization + sublist.elements for realization in realizations])
                 if(type(element) == OptionalConstruct):
                     intermediate_result.extend([realization + [EmptyConstruct(element.empty_frequency)] for realization in realizations])
@@ -830,8 +830,8 @@ class SuperLane:
         :type self: SuperLane
         :param elements: The list of elements
         :type elements: list of type SummarizationElement
-        :return: Whether the elements are identical
-        :rtype: bool
+        :return: Whether the elements are identical, the newly update lane
+        :rtype: bool, SuperLane
         '''
         import copy
         if (len(self.elements) != len(elements)):
@@ -841,9 +841,9 @@ class SuperLane:
             update_self = copy.deepcopy(self)
             for i in range(len(elements)):
                 if(type(elements[i]) ==  type(self.elements[i])):
-                    if(type(elements[i]) == InteractionConstruct and type(self.elements[i]) == InteractionConstruct and elements[i].activity == self.elements[i].activity):
-                        update_self.elements[i].frequency += elements[i].frequency
-                        continue
+                    if(type(elements[i]) == InteractionConstruct or type(self.elements[i]) == InteractionConstruct):
+                        return False, self
+
                     elif(type(elements[i]) == CommonConstruct and type(self.elements[i]) == CommonConstruct and elements[i].activity == self.elements[i].activity):
                         update_self.elements[i].frequency += elements[i].frequency
                         continue

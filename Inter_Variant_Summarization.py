@@ -191,7 +191,18 @@ def new_super_lane(summarization, lane, first, start_index = 0, outer_position =
                     new_interaction_points_mapping[mapping] = new_choice_mapping[mapping]
 
                 new_choices.append(new_choice)
-                length = max(length, len(new_choice))
+                if(isinstance(new_choice.elements[0], SVD.CommonConstruct) or isinstance(new_choice.elements[0], SVD.InteractionConstruct)):
+                    start_position = new_choice.elements[0].position.get_base_index()
+                else:
+                    start_position = new_choice.elements[0].position_end.get_base_index()
+
+                if(isinstance(new_choice.elements[-1], SVD.CommonConstruct) or isinstance(new_choice.elements[-1], SVD.InteractionConstruct)):
+                    end_position = new_choice.elements[-1].position.get_base_index()
+                else:
+                    end_position = new_choice.elements[-1].position_end.get_base_index()
+                
+
+                length = max(length, end_position - start_position + 1)
 
             if(isinstance(elem, SVD.ChoiceConstruct)):
                 elements.append(SVD.ChoiceConstruct(new_choices, IED.BasePosition(option, current_horizontal_index), IED.BasePosition(option, current_horizontal_index + length-1), current_horizontal_index, current_horizontal_index + length-1))

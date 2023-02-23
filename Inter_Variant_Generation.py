@@ -64,7 +64,7 @@ def generate_super_variant_hierarchy_by_classification(initial_super_variant_cla
             final_level_super_variants.append(class_final_level_super_variants)
 
         elif(frequency_distribution_type == Distribution.EXPLORATION):
-            class_result = generate_super_variant_hierarchy_exploration(super_variant_set, max_number_of_levels, base, print_results)
+            class_result = generate_super_variant_hierarchy_exploration(super_variant_set, number_of_super_variants_per_class, max_number_of_levels, base, print_results)
             final_level_super_variants.append((max(class_result.items(), key=lambda x:x[0]))[1][0])
 
         result.append(class_result)
@@ -104,11 +104,13 @@ def generate_super_variant_hierarchy_normal(initial_super_variant_set, number_of
     '''
     return generate_super_variant_hierarchy_by_frequency(initial_super_variant_set, number_of_super_variants, max_number_of_levels, Distribution.NORMAL, print_results)
 
-def generate_super_variant_hierarchy_exploration(initial_super_variant_set, max_number_of_levels, base = 2, print_results = False):
+def generate_super_variant_hierarchy_exploration(initial_super_variant_set, number_of_super_variants, max_number_of_levels, base = 2, print_results = False):
     '''
     Generates an exploratory Super Variant hierarchy given a logarithmic base and a maximal number of levels.
     :param initial_super_variant_set: The set of Super Variants
     :type initial_super_variant_set: list
+    :param number_of_super_variants: The number of desired clusters and final Super Variants
+    :type number_of_super_variants: int
     :param max_number_of_level: The maximal level reached in the generation of Super Variants
     :type max_number_of_level: int
     :param base: The logarithmic base, determines how many variants are to be summarized in a single generative step 
@@ -118,7 +120,7 @@ def generate_super_variant_hierarchy_exploration(initial_super_variant_set, max_
     :return: The set of Super Variants for each level and the levels accumulated cost
     :rtype: dict
     '''
-    return generate_super_variant_hierarchy_by_cost([(super_variant, None, None) for super_variant in initial_super_variant_set], max_number_of_levels, 0, base, print_results)
+    return generate_super_variant_hierarchy_by_cost([(super_variant, None, None) for super_variant in initial_super_variant_set], number_of_super_variants, max_number_of_levels, 0, base, print_results)
 
 
 def generate_super_variant_hierarchy_by_frequency(initial_super_variant_set, number_of_super_variants, max_number_of_levels, distribution_type, print_results = False):
@@ -158,7 +160,7 @@ def generate_super_variant_hierarchy_by_frequency(initial_super_variant_set, num
         result = []
         final_level_super_variants = []
         for cluster in clusters:
-            cluster_result = generate_super_variant_hierarchy_by_cost([(super_variant, None, None) for super_variant in cluster.values()], max_number_of_levels, 0, base, print_results)
+            cluster_result = generate_super_variant_hierarchy_by_cost([(super_variant, None, None) for super_variant in cluster.values()], number_of_super_variants, max_number_of_levels, 0, base, print_results)
             final_level_super_variants.extend((max(cluster_result.items(), key=lambda x:x[0]))[1][0])
             if(print_results):
                 print("The following levels have been generated.")
@@ -172,11 +174,13 @@ def generate_super_variant_hierarchy_by_frequency(initial_super_variant_set, num
         return result, final_level_super_variants
     
 
-def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_number_of_level, counter, base, print_results = False):
+def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, number_of_super_variants, max_number_of_level, counter, base, print_results = False):
     '''
     Recursively generates Super Variants based on a initial set up to a desired depth using the minimum cost possible.
     :param initial_super_variant_set: The set of Super Variants
     :type initial_super_variant_set: list
+    :param number_of_super_variants: The number of desired clusters and final Super Variants
+    :type number_of_super_variants: int
     :param max_number_of_level: The maximal level reached in the generation of Super Variants
     :type max_number_of_level: int
     :param counter: The current generation level 
@@ -188,15 +192,17 @@ def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_numb
     :return: The set of Super Variants for each level and the levels accumulated cost
     :rtype: dict
     '''
-    if(len(initial_super_variant_set) == 1):
+    if(len(initial_super_variant_set) == 1 or len(initial_super_variant_set) <= number_of_super_variants):
         result = dict()
         result[counter] = (initial_super_variant_set, 0)
         return result
         
     else:
         indexed_initial_set = dict()
+        number_of_remaining_super_variants = 0
         for super_variant in initial_super_variant_set:
             indexed_initial_set[super_variant[0].id] = super_variant
+            number_of_remaining_super_variants += 1
 
 
         distances = dict()
@@ -212,6 +218,7 @@ def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_numb
 
         level_result = []
         accumulated_cost = 0
+        just_append = False
         for cluster in clusters:
             if(print_results):
                 print("Summarizing Super Variants with IDs: ")
@@ -219,20 +226,27 @@ def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_numb
                     print(id)
 
             super_variant1 = indexed_initial_set[cluster[0]]
-            for i in range(1, len(cluster)):
-                super_variant2 = indexed_initial_set[cluster[i]]
-                super_variant, cost = IVS.join_super_variants(super_variant1[0], super_variant2[0], NESTED_STRUCTURES, False)
-                accumulated_cost += cost
-                super_variant1 = (copy.deepcopy(super_variant), copy.deepcopy(super_variant1), copy.deepcopy(super_variant2))
-            level_result.append(super_variant1)
+            if(len(level_result) + number_of_remaining_super_variants > number_of_super_variants and not just_append):
+                for i in range(1, len(cluster)):
+                    super_variant2 = indexed_initial_set[cluster[i]]
+                    super_variant, cost = IVS.join_super_variants(super_variant1[0], super_variant2[0], NESTED_STRUCTURES, False)
+                    accumulated_cost += cost
+                    super_variant1 = (copy.deepcopy(super_variant), copy.deepcopy(super_variant1), copy.deepcopy(super_variant2))
+                level_result.append(super_variant1)
+                number_of_remaining_super_variants -= len(cluster)
+            else:
+                just_append = True
+                for i in range(len(cluster)):
+                    level_result.append(indexed_initial_set[cluster[i]][0])
 
-        if(max_number_of_level == 1 or len(level_result) == 1):
+
+        if(max_number_of_level == 1 or len(level_result) == 1 or just_append):
             result = dict()
         else:
             if(counter == 0):
-                result = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 2, base, print_results)
+                result = generate_super_variant_hierarchy_by_cost(level_result, number_of_super_variants, max_number_of_level - 1, counter + 2, base, print_results)
             else:
-                result = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 1, base, print_results)
+                result = generate_super_variant_hierarchy_by_cost(level_result, number_of_super_variants, max_number_of_level - 1, counter + 1, base, print_results)
         
         if(counter == 0):
             result[1] = (level_result, accumulated_cost)

@@ -509,12 +509,12 @@ def __get_longest_common_subsequence(lanes, intra = False, interactions = None):
     :return: The Longest Common Subsequence and the corresponding positions in the lanes, the length of the longest_common_subsequence, the number of common interactions in the subsequence
     :rtype: list, int, int
     '''
-    base_element = lanes[0][1].elements[lanes[0][2]-1]
 
     if any([lane[2] == 0 for lane in lanes]):
         return [], 0, 0
 
     else:
+        base_element = lanes[0][1].elements[lanes[0][2]-1]
         intra_valid = False
         if (all((type(lane[1].elements[lane[2]-1]) == type(base_element) and lane[1].elements[lane[2]-1].activity == base_element.activity) for lane in lanes)):
             intra_valid = True

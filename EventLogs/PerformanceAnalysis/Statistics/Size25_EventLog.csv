@@ -1,0 +1,5 @@
+ID,Number of Variants,Accumulated Frequency,Avg. Number of Object Instances,Avg. Number of Activities,Avg. Number of Offer Instances,Number of Variants with offer > 1,Indices
+0,25,0.07553157727705491,2.2,13.64,1.2,4,[]
+1,25,0.07085052364328785,2.36,13.28,1.36,9,[]
+2,25,0.05276102824500159,2.52,13.76,1.52,13,[]
+3,25,0.04367661059980959,2.6,14.76,1.6,12,[]
