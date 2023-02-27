@@ -70,7 +70,8 @@ def get_unique_summarizations_from_process(process, print_results = False, get_t
         if(get_time):
             time_before_intra = time.perf_counter()
         extracted_variant = IED.extract_lanes(variant_layouting[process.variants[i]], process.variant_frequencies[i])
-        if(len(extracted_variant.lanes) <= 4):
+
+        if(max([len(extracted_variant.get_lanes_of_type(type)) for type in list(extracted_variant.object_types)]) <= 3):
             extracted_summarizations = IAVS.within_variant_summarization(extracted_variant, print_results)
             if(get_time):
                 time_after_intra = time.perf_counter()
@@ -89,6 +90,10 @@ def get_unique_summarizations_from_process(process, print_results = False, get_t
                 else:
                     all_unique_summarizations_dict[encoding] = ([i], [summarization])
                     all_unique_summarizations_set.append((encoding, [summarization]))
+
+        else: 
+            if(get_time):
+                times.append('NaN')
 
     if(get_time):
         return all_unique_summarizations_set, all_unique_summarizations_dict, times
@@ -119,21 +124,22 @@ def get_unique_summarizations_from_variants(process, variants, print_results = F
     for i in tqdm(range(len(variants))):
         print(' \n' + "Summarizing variant " + str(i) + " of the process...")
         extracted_variant = IED.extract_lanes(variant_layouting[variants[i][0]], variants[i][1])
-        extracted_summarizations = IAVS.within_variant_summarization(extracted_variant, print_results)
+        if(max([len(extracted_variant.get_lanes_of_type(type)) for type in list(extracted_variant.object_types)]) <= 3):
+            extracted_summarizations = IAVS.within_variant_summarization(extracted_variant, print_results)
 
-        for summarization in extracted_summarizations:
-            all_summarizations.append(summarization)
-            encoding = summarization.encode_lexicographically()
+            for summarization in extracted_summarizations:
+                all_summarizations.append(summarization)
+                encoding = summarization.encode_lexicographically()
 
-            if(encoding in all_unique_summarizations_dict.keys()):
-                all_unique_summarizations_dict[encoding][0].append(i)
-                all_unique_summarizations_dict[encoding][1].append(summarization)
-                for item in all_unique_summarizations_set:
-                    if (item[0] == encoding):
-                        item[1].append(summarization)
-            else:
-                all_unique_summarizations_dict[encoding] = ([i], [summarization])
-                all_unique_summarizations_set.append((encoding, [summarization]))
+                if(encoding in all_unique_summarizations_dict.keys()):
+                    all_unique_summarizations_dict[encoding][0].append(i)
+                    all_unique_summarizations_dict[encoding][1].append(summarization)
+                    for item in all_unique_summarizations_set:
+                        if (item[0] == encoding):
+                            item[1].append(summarization)
+                else:
+                    all_unique_summarizations_dict[encoding] = ([i], [summarization])
+                    all_unique_summarizations_set.append((encoding, [summarization]))
 
     return all_unique_summarizations_set, all_unique_summarizations_dict
 

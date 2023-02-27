@@ -1,0 +1,5 @@
+ID,Number of Variants,Avg. Number of Activities,Avg. Number of Application,Avg. Number of Offers,Contains > 3 Offers in Variant,Index 0,Index 1,Index 2,Index 3,Index 4,Index 5,Index 6,Index 7,Index 8,Index 9,Index 10,Index 11,Index 12,Index 13,Index 14,Index 15,Index 16,Index 17,Index 18,Index 19
+0,20,13.45,1.0,1.45,0,56,162,24,173,133,93,410,198,74,275,138,380,146,194,208,214,238,445,390,310
+1,20,13.35,1.0,1.6,1,151,342,199,101,284,91,193,435,48,8,225,412,325,226,347,62,407,269,85,178
+2,20,14.45,1.0,1.6,0,187,319,300,264,9,356,198,370,66,425,271,79,285,74,122,294,203,381,384,292
+3,20,14.05,1.0,1.75,1,173,401,396,6,412,395,195,347,138,61,104,444,147,133,418,272,116,106,160,234

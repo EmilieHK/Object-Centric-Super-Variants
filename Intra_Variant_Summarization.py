@@ -1,9 +1,8 @@
 import Super_Variant_Definition as SVD
 import Inter_Lane_Summarization as ILS
 import Inter_Lane_Alignment as ILA
-import Super_Variant_Visualization as SVV
 
-def __get_candidates(lanes, interactions):
+def get_candidates(lanes, interactions):
     '''
     Yields all maximal merging candidate sets for a set of lanes, thus, all sets of lanes that share all interactions with other lanes.
     :param lanes: The lanes of the variant
@@ -132,7 +131,7 @@ def within_variant_summarization(variant, print_results = False):
     '''
 
     # Initialize candidate parameters 
-    all_candidates = __get_candidates(variant.lanes, variant.interaction_points)
+    all_candidates = get_candidates(variant.lanes, variant.interaction_points)
     first_choice =  get_partitions(all_candidates[0])
     all_summarizations = []
     init_summary = {}
@@ -191,4 +190,5 @@ def get_partitions(candidate):
     partitions = []
     for n, partition in enumerate(__partition(list(candidate)), 1):
         partitions.append(partition)
+    partitions.reverse()
     return partitions

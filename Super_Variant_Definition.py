@@ -199,6 +199,36 @@ class SummarizedVariant:
                 return lane
         return None
 
+    def get_lanes_of_type(self, type_label):
+        '''
+        Finds and returns all lanes of the summarized variant with the given object type.
+        :param self: The summarized variant
+        :type self: SummarizedVariant
+        :param type_label: The label of the type
+        :type type_label: str
+        :return: The corresponding Super Lanes
+        :rtype: list of type SuperLane
+        '''
+        result = []
+        for lane in self.lanes:
+            if (lane.object_type == type_label):
+                result.append(lane)
+        return result
+
+    def get_number_of_events(self):
+        '''
+        Returns the number of events of the variant.
+        :param self: The summarized variant
+        :type self: SummarizedVariant
+        :return: The corresponding count
+        :rtype: int
+        '''
+        result = 0
+        for lane in self.lanes:
+            result += lane.get_number_of_events()
+        result += len(self.interaction_points)
+        return result
+
     def remove_gaps(self):
         '''
         Removes unnecessary gaps from the Super Variant for improved visualization.
@@ -268,6 +298,23 @@ class SuperLane:
             result_string += str(self.elements[i]) + ","       
         result_string = result_string[:-1]
         return result_string + "]"
+
+    def get_number_of_events(self):
+        '''
+        Returns the number of events of the lane, excluding the interaction points.
+        :param self: The summarizing Super Lane
+        :type self: SuperLane
+        :return: The corresponding count
+        :rtype: int
+        '''
+        result = 0
+        for element in self.elements:
+            if (isinstance(element, CommonConstruct) and not isinstance(element, InteractionConstruct)):
+                result += 1
+            elif(isinstance(element, GeneralChoiceStructure)):
+                for option in element.choices:
+                    result += option.get_number_of_events()
+        return result
 
     def get_length(self):
         '''

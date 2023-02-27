@@ -18,7 +18,7 @@ filename = "EventLogs/BPI2017.jsonocel"
 ocel = ocel_import_factory.apply(file_path = filename)
 #print(len(ocel.variants))
 
-ocel_filtered = variant_filtering.filter_infrequent_variants(ocel, 0.4)
+ocel_filtered = variant_filtering.filter_infrequent_variants(ocel, 0.2)
 print(len(ocel_filtered.variants))
 ocel_export_factory.apply(ocel_filtered, 'EventLogs/PerformanceAnalysis/BPI2017-Filtered_20.jsonocel')
 

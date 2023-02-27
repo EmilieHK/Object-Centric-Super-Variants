@@ -1,0 +1,5 @@
+ID,Number of Variants,Avg. Number of Activities,Avg. Number of Application,Avg. Number of Offers,Contains > 3 Offers in Variant,Index 0,Index 1,Index 2,Index 3,Index 4
+0,5,13.4,1.0,1.2,0,157,8,32,220,29
+1,5,13.0,1.0,1.4,0,266,233,152,287,274
+2,5,11.4,1.0,1.4,0,276,288,236,334,74
+3,5,15.8,1.0,2.2,1,353,276,273,216,221

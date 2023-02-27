@@ -252,7 +252,7 @@ def join_super_lanes(summarization1, summarization2, lane1, lane2, allow_nested_
 
 
 
-def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_lanes2, propagate = True, print_result = True):
+def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_lanes2, propagate = True, print_result = False):
     '''
     Performs a mapping between the lanes of one Super Variant to the lanes of the other Super Variant based on the Levenshtein distance.
     :param summarization1: The Super Variant corresponding to the first set of lanes
@@ -260,7 +260,7 @@ def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_
     :param summarization2: The Super Variant corresponding to the second set of lanes
     :type summarization2: SuperVariant
     :param remaining_lanes1: The set of Super Lanes of Super Variant 1 that have not yet been mapped
-    :type remaining_lanes1: list of type SuperLane
+    :type remaining_lanes1: list of type SuperLanea
     :param remaining_lanes2: The set of Super Lanes of Super Variant 2 that have not yet been mapped
     :type remaining_lanes2: list of type SuperLane
     :param propagate: Whether the decision made should be propagated among the interacting lanes
@@ -354,7 +354,7 @@ def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_
                     propagation_lanes2 = [lane for lane in intermediate_remaining_lanes2_now if lane.lane_id in interacting_lanes2]
 
                     # Propagate decision
-                    intermediate_propagation_matching, intermediate_propagation_cost, intermediate_remaining_lanes1, intermediate_remaining_lanes2 = propagate_decision(summarization1, summarization2, remaining_lanes1, intermediate_remaining_lanes2_now, propagation_lanes1, propagation_lanes2, print_result)
+                    intermediate_propagation_matching, intermediate_propagation_cost, intermediate_remaining_lanes1, intermediate_remaining_lanes2 = propagate_decision(summarization1, summarization2, remaining_lanes1, intermediate_remaining_lanes2_now, propagation_lanes1, propagation_lanes2, print_result = print_result)
 
                 else:
                     if(print_result):
@@ -388,7 +388,7 @@ def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_
             following_matching = []
             following_cost = 0
         else:
-            following_matching, following_cost = decide_matching(summarization1, summarization2, new_remaining_lanes1, new_remaining_lanes2, print_result)
+            following_matching, following_cost = decide_matching(summarization1, summarization2, new_remaining_lanes1, new_remaining_lanes2, print_result = print_result)
         return matching + propagation_matching + following_matching, least_cost + following_cost
 
 
