@@ -3,6 +3,7 @@ import Super_Variant_Visualization as SVV
 from enum import Enum
 import copy 
 import math
+import time
 
 class Distribution(Enum):
     UNIFORM = 1
@@ -64,7 +65,7 @@ def generate_super_variant_hierarchy_by_classification(initial_super_variant_cla
             final_level_super_variants.append(class_final_level_super_variants)
 
         elif(frequency_distribution_type == Distribution.EXPLORATION):
-            class_result = generate_super_variant_hierarchy_exploration(super_variant_set, max_number_of_levels, base, print_results)
+            class_result = generate_super_variant_hierarchy_exploration(super_variant_set, number_of_super_variants_per_class, max_number_of_levels, base, print_results)
             final_level_super_variants.append((max(class_result.items(), key=lambda x:x[0]))[1][0])
 
         result.append(class_result)
@@ -172,7 +173,7 @@ def generate_super_variant_hierarchy_by_frequency(initial_super_variant_set, num
         return result, final_level_super_variants
     
 
-def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_number_of_level, counter, base, print_results = False):
+def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_number_of_level, counter, base, print_results = False, meassure_times = False, times = None):
     '''
     Recursively generates Super Variants based on a initial set up to a desired depth using the minimum cost possible.
     :param initial_super_variant_set: The set of Super Variants
@@ -185,19 +186,31 @@ def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_numb
     :type base: int
     :param print_results: Whether or not the print commands should be executed
     :type print_results: bool
+    :param meassure_times: Whether or not the computation times should be measured
+    :type meassure_times: bool
+    :param times: The times of the other levels
+    :type times: dict
     :return: The set of Super Variants for each level and the levels accumulated cost
     :rtype: dict
     '''
+  
     if(len(initial_super_variant_set) == 1):
         result = dict()
         result[counter] = (initial_super_variant_set, 0)
         return result
         
     else:
+        if(meassure_times):
+            time_start = time.perf_counter()
+            number_offers = 0
         indexed_initial_set = dict()
         for super_variant in initial_super_variant_set:
             indexed_initial_set[super_variant[0].id] = super_variant
+            if(meassure_times):
+                number_offers += len(super_variant[0].get_lanes_of_type('offer'))
    
+        if(meassure_times):
+            time_before_mapping = time.perf_counter()
 
         distances = dict()
         for i in indexed_initial_set.keys():
@@ -208,7 +221,14 @@ def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_numb
                 else:
                     distances[i,j] = 0
 
-        clusters = cluster_by_size(indexed_initial_set, base, distances, print_results)
+        if(meassure_times):
+            time_after_mapping = time.perf_counter()
+
+        clusters = cluster_by_size(indexed_initial_set, max(base,2), distances, print_results)
+
+        if(meassure_times):
+            time_after_clustering = time.perf_counter()
+            number_summarizations = 0
 
         level_result = []
         accumulated_cost = 0
@@ -223,25 +243,50 @@ def generate_super_variant_hierarchy_by_cost(initial_super_variant_set, max_numb
             for i in range(1, len(cluster)):
                 super_variant2 = indexed_initial_set[cluster[i]]
                 super_variant, cost = IVS.join_super_variants(super_variant1[0], super_variant2[0], NESTED_STRUCTURES, False)
+                if(meassure_times):
+                    number_summarizations += 1
                 accumulated_cost += cost
                 super_variant1 = (copy.deepcopy(super_variant), copy.deepcopy(super_variant1), copy.deepcopy(super_variant2))
             level_result.append(super_variant1)
- 
 
-        if(max_number_of_level == 1 or len(level_result) == 1):
-            result = dict()
-        else:
-            if(counter == 0):
-                result = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 2, base, print_results)
+        if(meassure_times):
+            time_after_summarization = time.perf_counter()
+ 
+        if(meassure_times):
+            if(max_number_of_level == 1 or len(level_result) == 1):
+                result = dict()
             else:
-                result = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 1, base, print_results)
-        
-        if(counter == 0):
-            result[1] = (level_result, accumulated_cost)
-            result[0] = (initial_super_variant_set, 0)
+                if(counter == 0):
+                    result, times = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 2, base, print_results, meassure_times, times)
+                else:
+                    result, times = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 1, base, print_results, meassure_times, times)
+            
+            if(counter == 0):
+                result[1] = (level_result, accumulated_cost)
+                result[0] = (initial_super_variant_set, 0)
+                times[1] = [time_after_summarization-time_start, time_after_mapping-time_before_mapping, time_after_clustering-time_after_mapping, time_after_summarization-time_after_clustering, len(initial_super_variant_set), number_summarizations, number_offers/len(initial_super_variant_set)]
+            else:
+                result[counter] = (level_result, accumulated_cost)
+                times[counter] = [time_after_summarization-time_start, time_after_mapping-time_before_mapping, time_after_clustering-time_after_mapping, time_after_summarization-time_after_clustering, len(initial_super_variant_set), number_summarizations, number_offers/len(initial_super_variant_set)]
+
+            return result, times
+
         else:
-            result[counter] = (level_result, accumulated_cost)
-        return result
+            if(max_number_of_level == 1 or len(level_result) == 1):
+                result = dict()
+            else:
+                if(counter == 0):
+                    result = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 2, base, print_results)
+                else:
+                    result = generate_super_variant_hierarchy_by_cost(level_result, max_number_of_level - 1, counter + 1, base, print_results)
+            
+            if(counter == 0):
+                result[1] = (level_result, accumulated_cost)
+                result[0] = (initial_super_variant_set, 0)
+            else:
+                result[counter] = (level_result, accumulated_cost)
+
+            return result
 
 
 def cluster_by_frequency(indexed_initial_set, number_of_clusters, distribution_type, print_results = False):
@@ -344,6 +389,9 @@ def cluster_by_size(indexed_initial_set, cluster_size, distances, print_results 
 
     for i in range(number_of_clusters):
         model.addConstr(sum(x[i,elem] for elem in indexed_initial_set.keys()) >= 1)
+
+    for i in range(number_of_clusters):
+        model.addConstr(sum(x[i,elem] for elem in indexed_initial_set.keys()) <= cluster_size)
     
     model.setObjective(sum( (sum(sum(x[i,elem1]*x[i,elem2]*distances[elem1,elem2] for elem2 in indexed_initial_set.keys()) for elem1 in indexed_initial_set.keys()) / cluster_size) for i in range(number_of_clusters)))
     model.modelSense = gurobipy.GRB.MINIMIZE

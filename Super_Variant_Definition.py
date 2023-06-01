@@ -145,6 +145,7 @@ class SummarizedVariant:
         mapping = dict((x, y) for x, y in list(mapping.values()))
 
         interactions_result = []
+        new_interaction_points = []
         for interaction in self.interaction_points:
 
             # Encode references with the new lane_id and sort alphabetically
@@ -153,7 +154,9 @@ class SummarizedVariant:
             lanes_encoding = "".join(str(x) + ", " for x in interacting_lanes)
             lanes_encoding = lanes_encoding[:-2]
             encoding = f"IP[{interaction.index_in_lanes},[{lanes_encoding}]] "
+            #if(encoding not in interactions_result):
             interactions_result.append(encoding)
+                #new_interaction_points.append(interaction)
         
         interactions_result.sort() 
 
@@ -167,6 +170,7 @@ class SummarizedVariant:
         
         # Additionally sort the Super Lane itself
         self.lanes.sort(key = lambda x: x.lane_name)
+        #self.interaction_points = new_interaction_points
 
         return result
 
@@ -841,14 +845,14 @@ class SuperLane:
         valid_realizations = []
 
         for realization in all_realizations:
-            is_valid = False
+
             for comparison in self.realizations:
 
                 if (len(comparison.elements) != len(realization.elements)):
                     continue
                 else:
 
-                    is_equivalent = True
+                    is_equivalent = True 
                     for i in range(len(realization.elements)):
                         if(type(realization.elements[i]) ==  type(comparison.elements[i])):
                             if(type(realization.elements[i]) == InteractionConstruct and type(comparison.elements[i]) == InteractionConstruct and comparison.elements[i].activity == realization.elements[i].activity):
@@ -863,10 +867,8 @@ class SuperLane:
                             break
 
                     if(is_equivalent):
-                        is_valid = True
+                        valid_realizations.append(realization)
                         break
-            if(is_valid):
-                valid_realizations.append(realization)
 
         return valid_realizations
 

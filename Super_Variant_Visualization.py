@@ -5,9 +5,9 @@ import Input_Extraction_Definition as IED
 from enum import Enum
 
 DEFAULT_CHEVRON_LENGTH = 30.
-DEFAULT_CHEVRON_HEIGHT = 15.
+DEFAULT_CHEVRON_HEIGHT = 10
 OUTLINE_INTERACTIONS = False
-MARK_INCORRECT_INTERACTIONS = False
+MARK_INCORRECT_INTERACTIONS = True
 
 class Mode(Enum):
     LANE_FREQUENCY = 1
@@ -33,6 +33,7 @@ def visualize_super_variant(super_variant, suppression_char = "*", mode = Mode.A
     else:
 
         fig, ax = plt.subplots()
+        DEFAULT_CHEVRON_HEIGHT = 6 *(super_variant.get_depth())
         ax, width, height = arrange_super_variant(super_variant, ax, 0, 0, suppression_char, mode, 9, 9, 13)
         ax.set_aspect('equal')
         ax.set_xlim(-20, width + 2)
@@ -90,11 +91,13 @@ def is_inside(circle_xy, rad, xy):
 
 
 
-def visualize_variant(variant, mode = Mode.NO_FREQUENCY):
+def visualize_variant(variant, id, mode = Mode.NO_FREQUENCY):
     '''
     Visualizes a variant using sequentially aligned chevrons.
     :param variant: The variant that should be visualized
     :type variant: ExtractedVariant
+    :param id: The id of the variant
+    :type mode: int
     :param mode: One of the available modes for displaying frequencies
     :type mode: mode
     '''
@@ -103,9 +106,9 @@ def visualize_variant(variant, mode = Mode.NO_FREQUENCY):
         return
      
     else:
-        super_variant = variant.to_super_variant()
+        super_variant = variant.to_super_variant(id)
         fig, ax = plt.subplots()
-        ax, width, height =  arrange_super_variant(super_variant, ax, 0, 0, "", mode, 9, 9, 13)
+        ax, width, height =  arrange_super_variant(super_variant, ax, 0, 0, "*", mode, 9, 9, 13)
         ax.set_aspect('equal')
         ax.set_xlim(-20, width + 2)
         ax.set_ylim(-2, height + 2)
@@ -187,7 +190,7 @@ def arrange_super_variant(super_variant, ax, vertical_start_position, horizontal
 
         ax.text(-20 + horizontal_start_position, current_vertical_position * DEFAULT_CHEVRON_HEIGHT + 0.5 * lane_properties[lane_id]["Height"] * DEFAULT_CHEVRON_HEIGHT - 0.3, cardinality, zorder = 10, fontsize = fontsize_title)
         split_label = super_variant.lanes[i].lane_name.split(" ")
-        if (len(split_label[0]) > 8):
+        if (len(split_label[0]) > 8 and len(split_label) > 1):
             label = split_label[0][:8] + ". " + split_label[-1]
         else:
             label = super_variant.lanes[i].lane_name
@@ -313,21 +316,21 @@ def __interaction_activity_chevron(ax, lane, element, index, lane_properties, in
     if(not is_interacting):
         interacting_lanes = [[original_lane]]
         print("Interaction not found.")
-        outline_color = "red"
+        if(MARK_INCORRECT_INTERACTIONS):
+            outline_color = "red"
 
     else:
         all_interaction_points = IED.get_interaction_points(interaction_points, original_lane, element.position)
         if(len(all_interaction_points) == 1):
             interacting_lanes = [interaction_point.interaction_lanes]
-            if(len(set([position.get_base_index() for position in interaction_point.exact_positions])) > 1):
+            if(len(set([position.get_base_index() for position in interaction_point.exact_positions])) > 1 and MARK_INCORRECT_INTERACTIONS):
                 outline_color = "red"
         else:
             interacting_lanes = [all_interaction_points[0].interaction_lanes]
             for i in range(1, len(all_interaction_points)):
                 interacting_lanes.append(all_interaction_points[i].interaction_lanes)
-                if(len(set([position.get_base_index() for position in all_interaction_points[i].exact_positions])) > 1):
+                if(len(set([position.get_base_index() for position in all_interaction_points[i].exact_positions])) > 1 and MARK_INCORRECT_INTERACTIONS):
                     outline_color = "red"
-
 
     label = element.activity
     heigth_offset = 0.3
@@ -415,6 +418,7 @@ def __common_activity_chevron(ax, lane, element, index, lane_properties, current
 
     if(frequency and mode == Mode.ACTIVITY_FREQUENCY):
         label += "\n " + str(round(element.frequency * 100, 2)) + "%"
+        #label += "  " + str(round(element.frequency * 100, 2)) + "%"
         height_offset += 3 * chevron_length/DEFAULT_CHEVRON_LENGTH
 
     ax.text(current_horizontal_position + index * chevron_length + length_offset, current_vertical_position * chevron_height + 0.5 * chevron_height * lane_properties[lane]["Height"] - height_offset, label, zorder = 15, fontsize = fontsize * sizing_factor)

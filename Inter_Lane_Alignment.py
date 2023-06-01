@@ -1,8 +1,7 @@
 import Super_Variant_Definition as SVD
 import Input_Extraction_Definition as IED
 
-ALIGN = True
-
+ALIGN = False
 def join_interaction_mappings(interaction_mappings):
     '''
     Performs a series of pre-processing steps to the multiple interaction mappings necessary for later alignment.
@@ -55,7 +54,6 @@ def __merge_interactions(merged_interactions):
                 exists = True
         if(not exists):
             result_interactions[key1] = merged_interactions[key1]
-
     return result_interactions
 
 def __merge_interaction_mappings(mappings):
@@ -78,7 +76,6 @@ def __merge_interaction_mappings(mappings):
                     positions[mappings[k][0]] = mappings[k][1][key]
             if(len(positions.keys()) > 1 and key not in merged_mappings.keys()):
                 merged_mappings[key] = positions
-    
     return merged_mappings
 
 def __split_interaction_mappings(mappings):
@@ -105,7 +102,7 @@ def __split_interaction_mappings(mappings):
             new_positions = dict()
             for item in combinations[i]:
                 new_positions[item[0]] = item[1]
-            new_mappings[(interaction[0], str(interaction[1]) + " " + str(i))] = new_positions
+            new_mappings[(interaction, str(interaction[1]) + " " + str(i))] = new_positions
 
     #return __combine_interactions(new_mappings)
     return new_mappings
@@ -190,8 +187,11 @@ def __re_align_lanes(lanes, mappings, print_result, intra = True):
                 print(str(key) + ": " + str(earliest_interaction_point[1][key]))
         
         types = set([l.object_type for l in relevant_lanes])
-        element = relevant_lanes[0].get_element(updated_mappings[earliest_interaction_point[0]][relevant_lanes[0].lane_id])
-        activity_label = element.activity
+        try:
+            element = relevant_lanes[0].get_element(updated_mappings[earliest_interaction_point[0]][relevant_lanes[0].lane_id])
+            activity_label = element.activity
+        except:
+            activity_label = "NaN"
 
         all_positions = list(earliest_interaction_point[1].values())
 
@@ -202,6 +202,7 @@ def __re_align_lanes(lanes, mappings, print_result, intra = True):
             index = position.get_base_index()
             interacting_lanes = list(earliest_interaction_point[1].keys())
             exact_positions = list(earliest_interaction_point[1].values())
+            shifted_lanes = []
 
             for lane in relevant_lanes:
                 fixed_positions[lane.lane_id].append(str(earliest_interaction_point[1][lane.lane_id]))

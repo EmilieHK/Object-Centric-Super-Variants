@@ -117,8 +117,12 @@ def optional_super_lane(summarization, lane, first):
     '''
 
     new_lane, new_interaction_points_mapping = new_super_lane(summarization, lane, first)
+    if first:
+        id = tuple(lane.lane_id) + tuple()+("N",)
+    else:
+        id = tuple()+("N",) + tuple(lane.lane_id)
 
-    return SVD.OptionalSuperLane(tuple(lane.lane_id), lane.object_type + " i", new_lane.object_type, new_lane.elements, new_lane.cardinality, new_lane.frequency, new_lane.realizations), new_interaction_points_mapping
+    return SVD.OptionalSuperLane(id, lane.object_type + " i", new_lane.object_type, new_lane.elements, new_lane.cardinality, new_lane.frequency, new_lane.realizations), new_interaction_points_mapping
 
 
 def new_super_lane(summarization, lane, first, start_index = 0, outer_position = None, option = 0):
@@ -167,9 +171,9 @@ def new_super_lane(summarization, lane, first, start_index = 0, outer_position =
                 current_interaction_points = IED.get_interaction_points(summarization.interaction_points, lane.lane_id, elem.position)
                 for current_interaction_point in current_interaction_points:
                     if(first):
-                        new_interaction_points_mapping[(0, str([str(position) for position in current_interaction_point.exact_positions]), str(current_interaction_point.interaction_lanes))] = [position]
+                        new_interaction_points_mapping[(0, current_interaction_point.activity_name, str([str(position) for position in current_interaction_point.exact_positions]), str(current_interaction_point.interaction_lanes))] = [position]
                     else:
-                        new_interaction_points_mapping[(1, str([str(position) for position in current_interaction_point.exact_positions]), str(current_interaction_point.interaction_lanes))] = [position]
+                        new_interaction_points_mapping[(1, current_interaction_point.activity_name, str([str(position) for position in current_interaction_point.exact_positions]), str(current_interaction_point.interaction_lanes))] = [position]
 
             current_horizontal_index += 1
                 
@@ -260,7 +264,7 @@ def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_
     :param summarization2: The Super Variant corresponding to the second set of lanes
     :type summarization2: SuperVariant
     :param remaining_lanes1: The set of Super Lanes of Super Variant 1 that have not yet been mapped
-    :type remaining_lanes1: list of type SuperLanea
+    :type remaining_lanes1: list of type SuperLanes
     :param remaining_lanes2: The set of Super Lanes of Super Variant 2 that have not yet been mapped
     :type remaining_lanes2: list of type SuperLane
     :param propagate: Whether the decision made should be propagated among the interacting lanes
@@ -324,6 +328,8 @@ def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_
             for candidate_2 in matching_candidates_2:
                 if(print_result):
                     print("Evaluating the decision of matching lane " + str(current_matching_candidate_1.lane_id) + " of Super Variant 1 with the lane " + str(candidate_2.lane_id) + " of Super Variant 2.")
+                    print(current_matching_candidate_1)
+                    print(candidate_2)
                 intermediate_matching = [(current_matching_candidate_1.lane_id, candidate_2.lane_id)]
                 intermediate_cost = levenshtein_distance(current_matching_candidate_1, candidate_2)
                 if(isinstance(current_matching_candidate_1, SVD.OptionalSuperLane) and not isinstance(candidate_2, SVD.OptionalSuperLane)):
@@ -390,7 +396,7 @@ def decide_matching(summarization1, summarization2, remaining_lanes1, remaining_
         else:
             following_matching, following_cost = decide_matching(summarization1, summarization2, new_remaining_lanes1, new_remaining_lanes2, print_result = print_result)
         return matching + propagation_matching + following_matching, least_cost + following_cost
-
+ 
 
 def propagate_decision(summarization1, summarization2, all_remaining_lanes1, all_remaining_lanes2, current_candidates_lanes1, current_candidates_lanes2, print_result):
     '''
@@ -520,8 +526,8 @@ def levenshtein_distance(lane1, lane2):
     :rtype: int
     '''
     import math
-    realizations1 = lane1.get_valid_realizations()
-    realizations2 = lane2.get_valid_realizations()
+    realizations1 = lane1.realizations
+    realizations2 = lane2.realizations
     minimum = math.inf
 
     if(len(realizations1) >= len(realizations2)):

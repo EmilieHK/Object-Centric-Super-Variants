@@ -1,4 +1,4 @@
-#from ocpa.objects.log.importer.csv import factory as ocel_import_factory
+from ocpa.objects.log.importer.csv import factory as ocel_import_factory
 from ocpa.objects.log.importer.ocel import factory as ocel_import_factory
 from ocpa.visualization.log.variants import factory as variants_visualization_factory
 from ocpa.algo.util.filtering.log import case_filtering
@@ -9,29 +9,123 @@ import Super_Variant_Visualization as SVV
 import Summarization_Selection as SS
 import Intra_Variant_Generation as IAVG
 import Inter_Variant_Summarization as IEVS
+import Intra_Variant_Summarization as IAVS
 import Inter_Variant_Generation as IEVG
 import Super_Variant_Hierarchy as SVH
+import Super_Variant_Definition as SVD
+import Super_Variant_Visualization as SVV
+import Input_Extraction_Definition as IED
 
 MODE = 9
 
-filename = "EventLogs/BPI2017.jsonocel"
-ocel = ocel_import_factory.apply(file_path = filename)
-#print(len(ocel.variants))
 
-ocel_filtered = variant_filtering.filter_infrequent_variants(ocel, 0.2)
-print(len(ocel_filtered.variants))
-ocel_export_factory.apply(ocel_filtered, 'EventLogs/PerformanceAnalysis/BPI2017-Filtered_20.jsonocel')
+'''
+lanes_1 = []
+elements = [SVD.InteractionConstruct("D",1,IED.BasePosition(0,2), 2)]
+realization = SVD.SuperLane(0,"realization_0", "customers", elements, "1", 1, [])
+lanes_1.append(SVD.SuperLane(0,"customers_1", "customers",elements,"1",1,[realization]))
+
+elements = [SVD.InteractionConstruct("D",1,IED.BasePosition(0,2), 2), SVD.CommonConstruct("G",1,IED.BasePosition(0,3),3), SVD.InteractionConstruct("G",1,IED.BasePosition(0,4),4)]
+realization = SVD.SuperLane(0,"realization_0", "items", elements, "1", 1, [])
+lanes_1.append(SVD.SuperLane(1,"items_1", "items",elements,"1",1,[realization]))
+
+elements = [SVD.InteractionConstruct("D",1,IED.BasePosition(0,2), 2), SVD.CommonConstruct("F",1,IED.BasePosition(0,3),3), SVD.InteractionConstruct("G",1,IED.BasePosition(0,4),4)]
+realization = SVD.SuperLane(0,"realization_0", "items", elements, "1", 1, [])
+lanes_1.append(SVD.SuperLane(2,"items_2", "items",elements,"1",1,[realization]))
+
+elements = [SVD.CommonConstruct("A",1,IED.BasePosition(0,0),0), SVD.CommonConstruct("B",1,IED.BasePosition(0,1),1), SVD.InteractionConstruct("D",1,IED.BasePosition(0,2), 2), SVD.CommonConstruct("E",1,IED.BasePosition(0,3),3)]
+realization = SVD.SuperLane(0,"realization_0", "orders", elements, "1", 1, [])
+lanes_1.append(SVD.SuperLane(3,"orders_1", "orders",elements,"1",1,[realization]))
+
+interaction_points_1 = [IED.InteractionPoint("D", [0,1,2,3], {"customers","items","orders"},2,[IED.BasePosition(0,2),IED.BasePosition(0,2),IED.BasePosition(0,2),IED.BasePosition(0,2)]), IED.InteractionPoint("G", [1,2], {"items"},4,[IED.BasePosition(0,4),IED.BasePosition(0,4)])]
+
+super_variant_1 = SVD.SuperVariant(tuple()+(1,),lanes_1, {"customers","items","orders"}, interaction_points_1, 0.5)
+
+lanes_2 = []
+elements = [SVD.InteractionConstruct("C",1,IED.BasePosition(0,2), 2)]
+realization = SVD.SuperLane(0,"realization_0", "customers", elements, "1", 1, [])
+lanes_2.append(SVD.SuperLane(5,"customers_1", "customers",elements,"1",1,[realization]))
+
+elements = [SVD.InteractionConstruct("C",1,IED.BasePosition(0,2), 2), SVD.CommonConstruct("G",1,IED.BasePosition(0,3),3), SVD.InteractionConstruct("G",1,IED.BasePosition(0,4),4)]
+realization = SVD.SuperLane(0,"realization_0", "items", elements, "1", 1, [])
+lanes_2.append(SVD.SuperLane(6,"items_1", "items",elements,"1",1,[realization]))
+
+elements = [SVD.InteractionConstruct("C",1,IED.BasePosition(0,2), 2), SVD.CommonConstruct("G",1, IED.BasePosition(0,3),3), SVD.InteractionConstruct("G",1,IED.BasePosition(0,4),4)]
+realization = SVD.SuperLane(0,"realization_0", "items", elements, "1", 1, [])
+lanes_2.append(SVD.SuperLane(7,"items_2", "items",elements,"1",1,[realization]))
+
+elements = [SVD.CommonConstruct("A",1,IED.BasePosition(0,0),0), SVD.CommonConstruct("B",1,IED.BasePosition(0,1),1), SVD.InteractionConstruct("C",1,IED.BasePosition(0,2), 2), SVD.CommonConstruct("E",1,IED.BasePosition(0,3),3)]
+realization = SVD.SuperLane(0,"realization_0", "orders", elements, "1", 1, [])
+lanes_2.append(SVD.SuperLane(8,"orders_1", "orders",elements,"1",1,[realization]))
+
+interaction_points_2 = [IED.InteractionPoint("C", [5,6,7,8], {"customers","items","orders"},2,[IED.BasePosition(0,2),IED.BasePosition(0,2),IED.BasePosition(0,2),IED.BasePosition(0,2)]), IED.InteractionPoint("G", [6,7], {"items"},4,[IED.BasePosition(0,4),IED.BasePosition(0,4)])]
+
+super_variant_2 = SVD.SuperVariant(tuple()+(2,),lanes_2, {"customers","items","orders"}, interaction_points_2, 0.5)
+
+SVV.visualize_super_variant(super_variant_1, mode= SVV.Mode.NO_FREQUENCY)
+SVV.visualize_super_variant(super_variant_2, mode= SVV.Mode.NO_FREQUENCY)
+
+super_variant = IEVS.inter_variant_summarization(super_variant_1,super_variant_2,[(0,5),(1,6),(2,7),(3,8)], False, False)
+
+for interaction_point in super_variant.interaction_points:
+    print(interaction_point)
+
+#print(super_variant)
+SVV.visualize_super_variant(super_variant, mode=SVV.Mode.NO_FREQUENCY)
+'''
+
+#filename = "EventLogs/order_process.jsonocel"
+#ocel = ocel_import_factory.apply(file_path = filename)
+
+#all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization_from_variants(ocel,[(ocel.variants[0], ocel.variant_frequencies[0]), (ocel.variants[1], ocel.variant_frequencies[1]), (ocel.variants[2], ocel.variant_frequencies[2]) , (ocel.variants[3], ocel.variant_frequencies[3])])
+#summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
+
+#for summarization in summarizations:
+    #SVV.visualize_super_variant(summarization)
+
+#super_variant_1, cost = IEVS.join_super_variants(summarizations[0], summarizations[1],True, False)
+#super_variant_2, cost = IEVS.join_super_variants(summarizations[2], summarizations[3],True, False)
+#SVV.visualize_super_variant(super_variant_1, mode=SVV.Mode.NO_FREQUENCY)
+#SVV.visualize_super_variant(super_variant_2, mode=SVV.Mode.NO_FREQUENCY)
+
+#super_variant_3, cost = IEVS.join_super_variants(super_variant_1, super_variant_2,True, False)
+#SVV.visualize_super_variant(super_variant_3, mode=SVV.Mode.ACTIVITY_FREQUENCY)
+
+
+filename = "EventLogs/PerformanceAnalysis/BPI2017-Filtered_80.jsonocel"
+ocel = ocel_import_factory.apply(file_path = filename, )
+
+print(len(ocel.process_executions))
+print(len(ocel.variants))
+
+#ocel_filtered = variant_filtering.filter_infrequent_variants(ocel, 0.2)
+#print(len(ocel_filtered.variants))
+#ocel_export_factory.apply(ocel_filtered, 'EventLogs/PerformanceAnalysis/BPI2017-Filtered_20.jsonocel')
+
+
 
 
 #all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization(ocel)
 #summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
 
-#filename = "EventLogs/order_process.jsonocel"
+#filename = "EventLogs/Thesis_Example.jsonocel"
 #ocel = ocel_import_factory.apply(file_path = filename)
 
+#all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization_from_process(ocel)
+#summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
+#print(len(summarizations))
+#super_variant, cost = IEVS.join_super_variants(summarizations[0], summarizations[1],True, False)
+#SVV.visualize_super_variant(summarizations[0])
+#SVV.visualize_super_variant(summarizations[1])
+#SVV.visualize_super_variant(super_variant, mode=SVV.Mode.NO_FREQUENCY)
+
+#for super_variant in summarizations:
+    #SVV.visualize_super_variant(super_variant)
+
 #variant_layouting = variants_visualization_factory.apply(ocel)
-#extracted_variant = IED.extract_lanes(variant_layouting[ocel.variants[5]], ocel.variant_frequencies[5])
-#SVV.visualize_variant(extracted_variant)
+#for i in range(0,11):
+    #extracted_variant = IED.extract_lanes(variant_layouting[ocel.variants[i]], ocel.variant_frequencies[i])
+    #SVV.visualize_variant(extracted_variant)
 
 '''
 IEVG.NESTED_STRUCTURES = True

@@ -262,8 +262,8 @@ class ExtractedVariant:
                 return lane
         return None
 
-    def to_super_variant(self):
-        return SVD.SummarizedVariant([lane.to_super_lane(self.interaction_points) for lane in self.lanes], self.object_types, self.interaction_points, self.frequency)
+    def to_super_variant(self,id):
+        return SVD.SuperVariant(id,[lane.to_super_lane(self.interaction_points) for lane in self.lanes], self.object_types, self.interaction_points, self.frequency)
 
 
 def extract_lanes(variant, frequency):

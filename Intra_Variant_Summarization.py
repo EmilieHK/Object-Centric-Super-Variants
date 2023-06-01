@@ -119,7 +119,7 @@ def __branch_on_candidates(variant, remaining_candidates, init_summarization, le
         return result
 
 
-def within_variant_summarization(variant, print_results = False):
+def within_variant_summarization(variant, print_results = True):
     '''
     Yields all unique valid summarizations of a given variant.
     :param variant: The variant that is to be generalized

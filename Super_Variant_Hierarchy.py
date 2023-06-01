@@ -300,4 +300,4 @@ def visualize_single_summarization_step(super_variant_1, super_variant_2, new_su
     manager.window.showMaximized()
     plt.show()
 
-    fig.savefig("SuperVariantCompositions/SuperVariant_" + str(new_super_variant.id) + "_from" + str(super_variant_1[0].id) + "_and_" + str(super_variant_2[0].id) + ".svg")
+    fig.savefig("SuperVariantsCompositions/SuperVariant_" + str(new_super_variant.id) + "_from" + str(super_variant_1[0].id) + "_and_" + str(super_variant_2[0].id) + ".svg")
