@@ -74,10 +74,16 @@ for interaction_point in super_variant.interaction_points:
 SVV.visualize_super_variant(super_variant, mode=SVV.Mode.NO_FREQUENCY)
 '''
 
-#filename = "EventLogs/order_process.jsonocel"
-#ocel = ocel_import_factory.apply(file_path = filename)
 
-#all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization_from_variants(ocel,[(ocel.variants[0], ocel.variant_frequencies[0]), (ocel.variants[1], ocel.variant_frequencies[1]), (ocel.variants[2], ocel.variant_frequencies[2]) , (ocel.variants[3], ocel.variant_frequencies[3])])
+filename = "EventLogs/test_log.jsonocel"
+ocel = ocel_import_factory.apply(file_path = filename)
+
+variant_layouting = variants_visualization_factory.apply(ocel)
+for i in range(len(ocel.variants)):
+    extracted_variant = IED.extract_lanes(variant_layouting[ocel.variants[i]], ocel.variant_frequencies[i])
+    #SVV.visualize_variant(extracted_variant,i)
+
+all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization_from_process(ocel)
 #summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
 
 #for summarization in summarizations:
@@ -92,11 +98,12 @@ SVV.visualize_super_variant(super_variant, mode=SVV.Mode.NO_FREQUENCY)
 #SVV.visualize_super_variant(super_variant_3, mode=SVV.Mode.ACTIVITY_FREQUENCY)
 
 
-filename = "EventLogs/PerformanceAnalysis/BPI2017-Filtered_80.jsonocel"
-ocel = ocel_import_factory.apply(file_path = filename, )
+#from ocpa.objects.log.importer.ocel import factory as ocel_import_factory
+#filename = "EventLogs/test_log.jsonocel"
+#ocel = ocel_import_factory.apply(filename)
 
-print(len(ocel.process_executions))
-print(len(ocel.variants))
+#print(len(ocel.process_executions))
+#print(len(ocel.variants))
 
 #ocel_filtered = variant_filtering.filter_infrequent_variants(ocel, 0.2)
 #print(len(ocel_filtered.variants))

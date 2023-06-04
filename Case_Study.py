@@ -12,7 +12,6 @@ VISUALIZE_INTERMEDIATE_RESULTS = False
 MODE = 4
 ILA.ALIGN = True
 
-
 # Import event log
 filename = "EventLogs/BPI2017-Top10.jsonocel"
 ocel = ocel_import_factory.apply(file_path = filename)
