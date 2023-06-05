@@ -52,7 +52,7 @@ for final_super_variant in final_super_variants:
 '''
 
 
-initial_super_variants = summarizations[:10]
+initial_super_variants = summarizations[:11]
 IEVG.NESTED_STRUCTURES = False
 
 hierarchies, final_super_variants = IEVG.generate_super_variant_hierarchy(initial_super_variants,3, frequency_distribution_type=IEVG.Distribution.NORMAL)

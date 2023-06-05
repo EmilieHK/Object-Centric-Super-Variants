@@ -252,7 +252,11 @@ def join_super_lanes(summarization1, summarization2, lane1, lane2, allow_nested_
         realizations[i].lane_name = "realization " + str(i)
 
     elements, mappings =  ILS.__inter_lane_summarization([lane1, lane2], [summarization1.interaction_points, summarization2.interaction_points], print_result, nested = allow_nested_structures)
-    return SVD.SuperLane(lane_id, lane_name, object_type, elements, cardinality, frequency, realizations), mappings
+    
+    if(isinstance(lane1, SVD.OptionalSuperLane) or isinstance(lane2, SVD.OptionalSuperLane)):
+        return SVD.OptionalSuperLane(lane_id, lane_name, object_type, elements, cardinality, frequency, realizations), mappings
+    else:
+        return SVD.SuperLane(lane_id, lane_name, object_type, elements, cardinality, frequency, realizations), mappings
 
 
 

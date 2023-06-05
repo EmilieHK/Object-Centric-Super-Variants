@@ -1,8 +1,9 @@
 import Super_Variant_Definition as SVD
 import Input_Extraction_Definition as IED
 
-ALIGN = False
+ALIGN = True
 REPEAT_ALIGNMENT = True
+MODE_B = True
 def join_interaction_mappings(interaction_mappings):
     '''
     Performs a series of pre-processing steps to the multiple interaction mappings necessary for later alignment.
@@ -151,7 +152,7 @@ def __combine_interactions(mappings):
     return new_mappings
 
 
-def __re_align_lanes(lanes, mappings, print_result, intra = True):
+def __re_align_lanes(lanes, mappings, print_result, intra = True, repeat = REPEAT_ALIGNMENT):
     '''
     Given the summarized Super Lanes and the mappings from original interaction points to new indices, the lanes are aligned according to the interaction points.
     :param lanes: The summarized lanes of the Super Variant
@@ -170,7 +171,6 @@ def __re_align_lanes(lanes, mappings, print_result, intra = True):
     
     updated_mappings, aligned_lanes = copy.deepcopy(mappings), copy.deepcopy(lanes)
 
-    print(updated_mappings)
     changes_made = False
 
     updated_interaction_points = []
@@ -299,12 +299,12 @@ def __re_align_lanes(lanes, mappings, print_result, intra = True):
     for lane in aligned_lanes:
         final_lanes.append(copy.deepcopy(lane).shift_activities_up())
 
-    if (REPEAT_ALIGNMENT and changes_made):
+    if (repeat and changes_made):
         new_mappings = dict()
         for i in range(len(updated_interaction_points)):
             new_mappings[i] = dict(zip(updated_interaction_points[i].interaction_lanes, updated_interaction_points[i].exact_positions))
         
-        return __re_align_lanes(copy.deepcopy(final_lanes), copy.deepcopy(new_mappings), print_result, intra)
+        return __re_align_lanes(copy.deepcopy(final_lanes), copy.deepcopy(new_mappings), print_result, intra, repeat)
 
 
     return final_lanes, updated_interaction_points

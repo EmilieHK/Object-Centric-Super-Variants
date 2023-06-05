@@ -183,10 +183,7 @@ def arrange_super_variant(super_variant, ax, vertical_start_position, horizontal
 
         lane_id = super_variant.lanes[i].lane_id
         color = lane_properties[lane_id]["Color"]
-        if(super_variant.lanes[i].cardinality != "1"):
-            cardinality = suppression_char
-        else:
-            cardinality = super_variant.lanes[i].cardinality
+        cardinality = super_variant.lanes[i].cardinality.replace("n", suppression_char)
 
         ax.text(-20 + horizontal_start_position, current_vertical_position * DEFAULT_CHEVRON_HEIGHT + 0.5 * lane_properties[lane_id]["Height"] * DEFAULT_CHEVRON_HEIGHT - 0.3, cardinality, zorder = 10, fontsize = fontsize_title)
         split_label = super_variant.lanes[i].lane_name.split(" ")
