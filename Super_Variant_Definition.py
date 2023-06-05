@@ -120,14 +120,15 @@ class SummarizedVariant:
                 full_id = str(id)
                 while (len(full_id) < power_of_ten):
                     full_id = str(0) + full_id
-                encoded_lanes.append(full_id + encoding)
+                encoded_lanes.append(str(lane.object_type) + full_id + ";" + encoding)
 
                 # Store a reference between the temporary id and the original lane_id of the lane
-                mapping[full_id + encoding] = (lane.lane_id, 0)
+                mapping[str(lane.object_type) + full_id + ";" + encoding] = (lane.lane_id, 0)
                 id += 1
 
             # Sort the encodings aphabetically, excluding its temporary id
-            encoded_lanes.sort(key = lambda x: x[power_of_ten:])
+            encoded_lanes.sort(key = lambda x: x.split(";")[1])
+
             
             # Replace the temporary id with the enumeration of encodings as the new lane_id and add the object type to the prefix
             for i in range(len(encoded_lanes)):
@@ -137,7 +138,7 @@ class SummarizedVariant:
                 lane_id = mapping[encoded_lanes[i]][0]
                 mapping[encoded_lanes[i]]= (lane_id, object + " " + full_id)
                 self.rename_lane(lane_id, object + " " + full_id)
-                encoded_lanes[i] = object + " " + full_id + ": " + encoded_lanes[i][power_of_ten:] + " "
+                encoded_lanes[i] = object + " " + full_id + ": " + encoded_lanes[i].split(";")[1] + " "
 
             encoded_result.extend(encoded_lanes)
 

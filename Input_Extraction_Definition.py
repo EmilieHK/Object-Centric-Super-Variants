@@ -80,6 +80,14 @@ class InteractionPoint:
     def __str__(self):
         return f"Interaction Point: {self.activity_name} at Pos: {self.index_in_lanes}"
 
+    def __eq__(self, other):
+        if(type(self) == type(other) and (self.activity_name == other.activity_name) and (self.interaction_lanes == other.interaction_lanes)):
+            same_positions = True
+            for i in range(len(self.exact_positions)):
+                same_positions = same_positions and self.exact_positions[i] == other.exact_positions[i]
+            return same_positions
+        return False
+
 class LanePosition:
     '''The data structure for storing element positions in lanes'''
 

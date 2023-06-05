@@ -108,7 +108,7 @@ def visualize_variant(variant, id, mode = Mode.NO_FREQUENCY):
     else:
         super_variant = variant.to_super_variant(id)
         fig, ax = plt.subplots()
-        ax, width, height =  arrange_super_variant(super_variant, ax, 0, 0, "*", mode, 9, 9, 13)
+        ax, width, height =  arrange_super_variant(super_variant, ax, 0, 0, "*", mode, 9, 9, 30)
         ax.set_aspect('equal')
         ax.set_xlim(-20, width + 2)
         ax.set_ylim(-2, height + 2)
@@ -144,7 +144,7 @@ def arrange_super_variant(super_variant, ax, vertical_start_position, horizontal
     :rtype: axes, float, float
     '''
     import copy
-    all_colors = [(1,0.71,0.44), (0.56,0.81,0.56), (0.38,0.57,0.8), (1,0.87,143), (0.56,0.89,0.97)]
+    all_colors = [(1,0.71,0.44), (0.56,0.81,0.56), (0.38,0.57,0.8), (1,0.92,0.47), (0.56,0.89,0.97),(0.8,0.71,0.44), (0.4,0.81,0.56), (0.25,0.57,0.8), (0.8,0.92,0.47)]
     objects = list(super_variant.object_types)
     objects.sort()
     number_of_object_types = len(objects)
