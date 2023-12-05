@@ -75,24 +75,29 @@ SVV.visualize_super_variant(super_variant, mode=SVV.Mode.NO_FREQUENCY)
 '''
 
 
-filename = "EventLogs/test_log.jsonocel"
+filename = "EventLogs/Presentation_Example.jsonocel"
 ocel = ocel_import_factory.apply(file_path = filename)
 
 variant_layouting = variants_visualization_factory.apply(ocel)
 for i in range(len(ocel.variants)):
     extracted_variant = IED.extract_lanes(variant_layouting[ocel.variants[i]], ocel.variant_frequencies[i])
-    #SVV.visualize_variant(extracted_variant,i)
+    SVV.visualize_variant(extracted_variant,i)
 
-all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization_from_process(ocel)
-#summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
+all_summarizations, per_variant_dict, per_encoding_dict = IAVG.complete_intra_variant_summarization_from_variants(ocel, list(zip(ocel.variants[:4],ocel.variant_frequencies[:4])))
+summarizations = SS.intra_variant_summarization_selection(all_summarizations, per_variant_dict, per_encoding_dict)
 
-#for summarization in summarizations:
-    #SVV.visualize_super_variant(summarization)
 
-#super_variant_1, cost = IEVS.join_super_variants(summarizations[0], summarizations[1],True, False)
-#super_variant_2, cost = IEVS.join_super_variants(summarizations[2], summarizations[3],True, False)
-#SVV.visualize_super_variant(super_variant_1, mode=SVV.Mode.NO_FREQUENCY)
-#SVV.visualize_super_variant(super_variant_2, mode=SVV.Mode.NO_FREQUENCY)
+SVV.visualize_super_variant(all_summarizations[0][1][1][0].to_super_variant(tuple() + (0,)))
+SVV.visualize_super_variant(all_summarizations[1][1][1][0].to_super_variant(tuple() + (1,)))
+SVV.visualize_super_variant(all_summarizations[2][1][1][0].to_super_variant(tuple() + (1,)))
+SVV.visualize_super_variant(all_summarizations[3][1][1][0].to_super_variant(tuple() + (1,)))
+
+
+
+super_variant_1, cost = IEVS.join_super_variants(all_summarizations[0][1][1][0].to_super_variant(tuple() + (0,)), all_summarizations[1][1][1][0].to_super_variant(tuple() + (1,)),False, False)
+super_variant_2, cost = IEVS.join_super_variants(all_summarizations[2][1][1][0].to_super_variant(tuple() + (0,)), super_variant_1,False, False)
+SVV.visualize_super_variant(super_variant_1, mode=SVV.Mode.NO_FREQUENCY)
+SVV.visualize_super_variant(super_variant_2, mode=SVV.Mode.NO_FREQUENCY)
 
 #super_variant_3, cost = IEVS.join_super_variants(super_variant_1, super_variant_2,True, False)
 #SVV.visualize_super_variant(super_variant_3, mode=SVV.Mode.ACTIVITY_FREQUENCY)

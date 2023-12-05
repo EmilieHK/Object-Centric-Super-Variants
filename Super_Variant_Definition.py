@@ -92,6 +92,7 @@ class SummarizedVariant:
         :rtype: str
         '''
         import copy
+        #self = self.normalize()
         # Stores the mapping from original lane_id to the new lane_id based on the enumeration of the encoded lanes
         mapping = {}
         
@@ -890,10 +891,10 @@ class SuperLane:
             update_self = copy.deepcopy(self)
             for i in range(len(elements)):
                 if(type(elements[i]) ==  type(self.elements[i])):
-                    if(type(elements[i]) == InteractionConstruct or type(self.elements[i]) == InteractionConstruct):
-                        return False, self
-
-                    elif(type(elements[i]) == CommonConstruct and type(self.elements[i]) == CommonConstruct and elements[i].activity == self.elements[i].activity):
+                    #if(type(elements[i]) == InteractionConstruct or type(self.elements[i]) == InteractionConstruct):
+                        #return False, self
+                        
+                    if(((type(elements[i]) == CommonConstruct and type(self.elements[i]) == CommonConstruct) or (type(elements[i]) == InteractionConstruct or type(self.elements[i]) == InteractionConstruct)) and elements[i].activity == self.elements[i].activity):
                         update_self.elements[i].frequency += elements[i].frequency
                         continue
                     elif((type(elements[i]) == OptionalConstruct and type(self.elements[i]) == OptionalConstruct) or (type(elements[i]) == ChoiceConstruct and type(self.elements[i]) == ChoiceConstruct)):
@@ -912,7 +913,7 @@ class SuperLane:
                 else:
                     return False, self
         
-        return True, update_self
+            return True, update_self
 
 
    

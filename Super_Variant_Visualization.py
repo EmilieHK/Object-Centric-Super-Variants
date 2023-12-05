@@ -7,7 +7,7 @@ from enum import Enum
 DEFAULT_CHEVRON_LENGTH = 30.
 DEFAULT_CHEVRON_HEIGHT = 10
 OUTLINE_INTERACTIONS = False
-MARK_INCORRECT_INTERACTIONS = True
+MARK_INCORRECT_INTERACTIONS = False
 
 class Mode(Enum):
     LANE_FREQUENCY = 1
@@ -108,7 +108,7 @@ def visualize_variant(variant, id, mode = Mode.NO_FREQUENCY):
     else:
         super_variant = variant.to_super_variant(id)
         fig, ax = plt.subplots()
-        ax, width, height =  arrange_super_variant(super_variant, ax, 0, 0, "*", mode, 9, 9, 13)
+        ax, width, height =  arrange_super_variant(super_variant, ax, 0, 0, "*", mode, 9, 9, 30)
         ax.set_aspect('equal')
         ax.set_xlim(-20, width + 2)
         ax.set_ylim(-2, height + 2)
@@ -144,7 +144,7 @@ def arrange_super_variant(super_variant, ax, vertical_start_position, horizontal
     :rtype: axes, float, float
     '''
     import copy
-    all_colors = [(1,0.71,0.44), (0.56,0.81,0.56), (0.38,0.57,0.8), (1,0.87,143), (0.56,0.89,0.97)]
+    all_colors = [(1,0.71,0.44), (0.56,0.81,0.56), (0.38,0.57,0.8), (1,0.87,0.56), (0.56,0.89,0.97), (0.98,0.8,0.8), (0.9,0.97,0.85), (0.38,0.57,0.8), (1,0.87,0.56), (0.56,0.89,0.97)]
     objects = list(super_variant.object_types)
     objects.sort()
     number_of_object_types = len(objects)
@@ -357,10 +357,10 @@ def __interaction_activity_chevron(ax, lane, element, index, lane_properties, in
         number_sub_chevrons = len(interacting_lanes_list)
         length_sub_chevron = (1 / number_sub_chevrons)
    
-        interacting_lanes_list.sort(key = lambda x: original_lane_properties[x]["Color"])
+        interacting_lanes[-1].sort(key = lambda x: original_lane_properties[x]["Color"])
 
-        for i in range(len(interacting_lanes_list)):
-            color = original_lane_properties[interacting_lanes_list[i]]["Color"]
+        for i in range(len(interacting_lanes[-1])):
+            color = original_lane_properties[interacting_lanes[-1][i]]["Color"]
             ax.add_patch(patches.PathPatch(__partial_chevron_at_position(current_horizontal_position + index * chevron_length + i * length_sub_chevron * chevron_length, current_vertical_position * chevron_height, length_sub_chevron * chevron_length/DEFAULT_CHEVRON_LENGTH, lane_properties[lane]["Height"]  * chevron_height, current_percentage, current_percentage + sub_height), facecolor = color, lw = line_width, ls = overall_line_style, zorder = 10))
         
         current_percentage += sub_height

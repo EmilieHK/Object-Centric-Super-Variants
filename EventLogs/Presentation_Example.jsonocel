@@ -1,0 +1,362 @@
+{
+  "ocel:global-event": {
+    "ocel:activity": "__INVALID__"
+  },
+  "ocel:global-object": {
+    "ocel:type": "__INVALID__"
+  },
+  "ocel:global-log": {
+    "ocel:attribute-names": [
+    ],
+    "ocel:object-types": [
+      "a",
+      "b",
+	"c"
+    ],
+    "ocel:version": "1.0",
+    "ocel:ordering": "timestamp"
+  },
+
+
+"ocel:events": {
+    "0": {
+      "ocel:activity": "A",
+      "ocel:timestamp": "2019-05-20T09:07:40",
+      "ocel:omap": [
+        "a1","b1","b2","b3"
+      ],
+      "ocel:vmap": {}},
+
+
+"2": {
+      "ocel:activity": "C",
+      "ocel:timestamp": "2019-05-20T09:07:48",
+      "ocel:omap": [
+        "a1"
+      ],
+      "ocel:vmap": {}},
+
+"3": {
+      "ocel:activity": "D",
+      "ocel:timestamp": "2019-05-20T09:07:51",
+      "ocel:omap": [
+        "a1","b1","b2","b3"
+      ],
+      "ocel:vmap": {}},
+
+"4": {
+      "ocel:activity": "G",
+      "ocel:timestamp": "2019-05-20T09:07:50",
+      "ocel:omap": [
+        "b1"
+      ],
+      "ocel:vmap": {}},
+
+"5": {
+      "ocel:activity": "G",
+      "ocel:timestamp": "2019-05-20T09:07:49",
+      "ocel:omap": [
+        "b2"
+      ],
+      "ocel:vmap": {}},
+
+
+"8": {
+      "ocel:activity": "E",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b3"
+      ],
+      "ocel:vmap": {}},
+
+"9": {
+      "ocel:activity": "F",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "b3"
+      ],
+      "ocel:vmap": {}},
+
+ "10": {
+      "ocel:activity": "A",
+      "ocel:timestamp": "2019-05-20T09:07:40",
+      "ocel:omap": [
+        "a2","b4"
+      ],
+      "ocel:vmap": {}},
+
+"11": {
+      "ocel:activity": "B",
+      "ocel:timestamp": "2019-05-20T09:07:47",
+      "ocel:omap": [
+        "a2"
+      ],
+      "ocel:vmap": {}},
+
+
+"12": {
+      "ocel:activity": "C",
+      "ocel:timestamp": "2019-05-20T09:07:48",
+      "ocel:omap": [
+        "a2"
+      ],
+      "ocel:vmap": {}},
+
+"13": {
+      "ocel:activity": "D",
+      "ocel:timestamp": "2019-05-20T09:07:51",
+      "ocel:omap": [
+        "a2","b4"
+      ],
+      "ocel:vmap": {}},
+
+
+
+"18": {
+      "ocel:activity": "E",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b4"
+      ],
+      "ocel:vmap": {}},
+
+"19": {
+      "ocel:activity": "F",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "b4"
+      ],
+      "ocel:vmap": {}},
+
+"20": {
+      "ocel:activity": "H",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "c1"
+      ],
+      "ocel:vmap": {}},
+"21": {
+      "ocel:activity": "J",
+      "ocel:timestamp": "2019-05-20T09:07:52",
+      "ocel:omap": [
+        "b4","c1"
+      ],
+      "ocel:vmap": {}},
+"210": {
+      "ocel:activity": "A",
+      "ocel:timestamp": "2019-05-20T09:07:40",
+      "ocel:omap": [
+        "a3","b5","b6","b7"
+      ],
+      "ocel:vmap": {}},
+
+
+
+"212": {
+      "ocel:activity": "C",
+      "ocel:timestamp": "2019-05-20T09:07:48",
+      "ocel:omap": [
+        "a3"
+      ],
+      "ocel:vmap": {}},
+
+"213": {
+      "ocel:activity": "D",
+      "ocel:timestamp": "2019-05-20T09:07:51",
+      "ocel:omap": [
+        "a3","b5","b6","b7"
+      ],
+      "ocel:vmap": {}},
+
+
+
+"218": {
+      "ocel:activity": "E",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b6"
+      ],
+      "ocel:vmap": {}},
+"22218": {
+      "ocel:activity": "E",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b7"
+      ],
+      "ocel:vmap": {}},
+"2218": {
+      "ocel:activity": "G",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b5"
+      ],
+      "ocel:vmap": {}},
+
+"219": {
+      "ocel:activity": "F",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "b6"
+      ],
+      "ocel:vmap": {}},
+"2219": {
+      "ocel:activity": "F",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "b7"
+      ],
+      "ocel:vmap": {}},
+
+"220": {
+      "ocel:activity": "H",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "c2"
+      ],
+      "ocel:vmap": {}},
+
+"221": {
+      "ocel:activity": "J",
+      "ocel:timestamp": "2019-05-20T09:07:52",
+      "ocel:omap": [
+        "b5","c2"
+      ],
+      "ocel:vmap": {}},
+
+"3210": {
+      "ocel:activity": "A",
+      "ocel:timestamp": "2019-05-20T09:07:40",
+      "ocel:omap": [
+        "a4","b8","b9","b10"
+      ],
+      "ocel:vmap": {}},
+
+
+
+"3212": {
+      "ocel:activity": "C",
+      "ocel:timestamp": "2019-05-20T09:07:48",
+      "ocel:omap": [
+        "a4"
+      ],
+      "ocel:vmap": {}},
+
+"3213": {
+      "ocel:activity": "D",
+      "ocel:timestamp": "2019-05-20T09:07:51",
+      "ocel:omap": [
+        "a4","b8","b9","b10"
+      ],
+      "ocel:vmap": {}},
+
+
+
+"3218": {
+      "ocel:activity": "E",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b9"
+      ],
+      "ocel:vmap": {}},
+"322218": {
+      "ocel:activity": "E",
+      "ocel:timestamp": "2019-05-20T09:07:44",
+      "ocel:omap": [
+        "b10"
+      ],
+      "ocel:vmap": {}},
+
+"3219": {
+      "ocel:activity": "F",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "b9"
+      ],
+      "ocel:vmap": {}},
+"32219": {
+      "ocel:activity": "F",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "b10"
+      ],
+      "ocel:vmap": {}},
+
+"3220": {
+      "ocel:activity": "H",
+      "ocel:timestamp": "2019-05-20T09:07:45",
+      "ocel:omap": [
+        "c3"
+      ],
+      "ocel:vmap": {}},
+"3221": {
+      "ocel:activity": "J",
+      "ocel:timestamp": "2019-05-20T09:07:52",
+      "ocel:omap": [
+        "b8","c3"
+      ],
+      "ocel:vmap": {}}
+
+
+},
+
+ "ocel:objects": {
+"a1": {
+      "ocel:type": "a",
+      "ocel:ovmap": {}},
+
+"b1": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+
+"b2": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+
+"b3": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"a2": {
+      "ocel:type": "a",
+      "ocel:ovmap": {}},
+
+"b4": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"c1": {
+      "ocel:type": "c",
+      "ocel:ovmap": {}},
+"a3": {
+      "ocel:type": "a",
+      "ocel:ovmap": {}},
+
+"b5": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"c2": {
+      "ocel:type": "c",
+      "ocel:ovmap": {}},
+"b6": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"b7": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"b8": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"c3": {
+      "ocel:type": "c",
+      "ocel:ovmap": {}},
+"b9": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"b10": {
+      "ocel:type": "b",
+      "ocel:ovmap": {}},
+"a4": {
+      "ocel:type": "a",
+      "ocel:ovmap": {}}
+
+
+}
+}

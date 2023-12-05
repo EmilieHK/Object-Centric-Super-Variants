@@ -61,6 +61,10 @@ class VariantLane:
         super_lane = SVD.SuperLane(self.lane_id, self.lane_name, self.object_type, elements, "1", 1, [SVD.SuperLane(0, "realization 0", self.object_type, elements, "1", 1, [])])
         return super_lane
 
+    def normalize(self):
+        self.horizontal_indices = range(len(self.activities))
+        return self
+
 
 class InteractionPoint:
     '''The data structure of an Interaction Point'''
@@ -139,6 +143,16 @@ class RecursiveLanePosition(LanePosition):
         '''
         self.position.set_base_position(new_position)
 
+    def set_base_index(self, new_position):
+        ''' 
+        Replaces the base position of the position element.
+        :param self: The current position element
+        :type self: RecursiveLanePosition
+        :param new_position: The new base position element
+        :type new_position: BasePosition
+        '''
+        self.position.set_base_index(new_position)
+
     def add_level(self, new_position):
         ''' 
         Addes another nested level to the position.
@@ -209,6 +223,17 @@ class BasePosition(LanePosition):
         :type new_position: BasePosition
         '''
         self = new_position
+
+
+    def set_base_index(self, index):
+        ''' 
+        Replaces the base position.
+        :param self: The position element
+        :type self: BasePosition
+        :param new_position: The new position element
+        :type new_position: BasePosition
+        '''
+        self.position = index
 
 
 

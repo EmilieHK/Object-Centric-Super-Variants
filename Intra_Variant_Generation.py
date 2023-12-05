@@ -1,6 +1,7 @@
 import Input_Extraction_Definition as IED
 import Intra_Variant_Summarization as IAVS
 import time
+import Super_Variant_Visualization as SVV
 
 def complete_intra_variant_summarization_from_process(process, print_results = False, get_time = False):
     '''
@@ -65,14 +66,15 @@ def get_unique_summarizations_from_process(process, print_results = False, get_t
     if(get_time):
         times = []
 
-    for i in tqdm(range(len(process.variants))):
+    for i in tqdm(range(10)):
         print(' \n' + "Summarizing variant " + str(i) + " of the process...")
         if(get_time):
             time_before_intra = time.perf_counter()
         extracted_variant = IED.extract_lanes(variant_layouting[process.variants[i]], process.variant_frequencies[i])
+        #SVV.visualize_variant(extracted_variant,i)
 
         #if(max([len(extracted_variant.get_lanes_of_type(type)) for type in list(extracted_variant.object_types)]) <= 3):
-        if(max([len(interaction_point.interaction_lanes) for interaction_point in list(extracted_variant.interaction_points)]) <= 4):
+        if(max([len(interaction_point.interaction_lanes) for interaction_point in list(extracted_variant.interaction_points)]) <= 6):
             extracted_summarizations = IAVS.within_variant_summarization(extracted_variant, print_results)
             if(get_time):
                 time_after_intra = time.perf_counter()
@@ -122,10 +124,10 @@ def get_unique_summarizations_from_variants(process, variants, print_results = F
     all_unique_summarizations_set = []
     all_summarizations = []
 
-    for i in tqdm(range(len(variants))):
+    for i in tqdm(range(10)):
         print(' \n' + "Summarizing variant " + str(i) + " of the process...")
         extracted_variant = IED.extract_lanes(variant_layouting[variants[i][0]], variants[i][1])
-        if(max([len(extracted_variant.get_lanes_of_type(type)) for type in list(extracted_variant.object_types)]) <= 3):
+        if(max([len(interaction_point.interaction_lanes) for interaction_point in list(extracted_variant.interaction_points)]) <= 6):
             extracted_summarizations = IAVS.within_variant_summarization(extracted_variant, print_results)
 
             for summarization in extracted_summarizations:
